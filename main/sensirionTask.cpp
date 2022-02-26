@@ -11,6 +11,7 @@
 
 #include "guiTask.h"
 #include "guiCommonTask.h"
+#include "connect.h"
 
 #include "SparkFun_SCD30_Arduino_Library.h"
 #define LV_SYMBOL_OHM    "\xef\xCE\xA9"  //0x3A9
@@ -100,9 +101,6 @@ void sensirionTask(void *pvParameter) {
 	displayMssg.str1 = str;
 	displayMssg.str2 = str2;
 
-	sprintf(str, "----");
-	displayMssg.line = 1;
-
 	while( displayMssgBox == NULL){ // wait for display
 		vTaskDelay(100 / portTICK_PERIOD_MS);
 	}
@@ -126,7 +124,7 @@ void sensirionTask(void *pvParameter) {
 	displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
 	airSensor.setMeasurementInterval(LOGINTERVAL);
 	airSensor.setAutoSelfCalibration(true);
-	airSensor.setTemperatureOffset(1);
+	airSensor.setTemperatureOffset(2.0);
 	xSemaphoreGive(I2CSemaphore);
 	//testLog();
 
@@ -176,7 +174,7 @@ void sensirionTask(void *pvParameter) {
 				if (logTxIdx >= MAXLOGVALUES)
 					logTxIdx = 0;
 
-				sprintf( str,"meting %d", cntr++);
+				sprintf( str,"IP:%s %d",ipstr, cntr++);
 				displayMssg.displayItem = DISPLAY_ITEM_STATUSLINE;
 				if ( xQueueSend( displayMssgBox, &displayMssg, 0 ) == pdPASS)
 					xQueueReceive(displayReadyMssgBox, &dummy, 500); // if accepted wait until data is displayed

@@ -20,7 +20,7 @@
 #endif
 
 
-// fonts Ohm, micro  0x3A9, 0x3BC, 0x5E, 0xB0 01234567890 -.,mMnkVAHzOVERNGE
+// fonts 0x5E 0xB0 0123456789 :-.,C%
 //https://lvgl.io/tools/fontconverter
 #define LV_TICK_PERIOD_MS 30
 

@@ -87,6 +87,7 @@ static EventGroupHandle_t s_wifi_event_group;
 esp_netif_t* wifi_start(void);
 static void wifi_stop(void);
 esp_err_t start_file_server(const char *base_path);
+char ipstr[17] {"not assigned"};
 
 
 static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
@@ -101,6 +102,10 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 	} else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
 		xEventGroupSetBits(s_wifi_event_group, CONNECTED_BIT);
 		xEventGroupClearBits(s_wifi_event_group, DISCONNECTED_BIT);
+        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+        sprintf( ipstr,IPSTR, IP2STR(&event->ip_info.ip));
+        ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
+
 		connected = true;
 	} else if (event_base == SC_EVENT && event_id == SC_EVENT_SCAN_DONE) {
 		ESP_LOGI(TAG, "Scan done");

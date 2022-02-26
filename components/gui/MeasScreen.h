@@ -28,7 +28,7 @@ class MeasScreen { //public Stream{
 public:
 	MeasScreen();
 	virtual ~MeasScreen();
-	static const int MAXVALUECHARS = 10;
+	static const int MAXVALUECHARS = 8;
 	void show();
 	void setDisplayText(int line , const  char * text);
 	void setValueAndName( int line , const char * value, const char * name);
@@ -78,6 +78,8 @@ public:
 private:
 	char  measValue1[MAXVALUECHARS+3]; // extra space for a symbol (3 characters)
 	static void event_handler(lv_obj_t * obj, lv_event_t event);
+	static void screenClicked(lv_event_t * event);
+	lv_obj_t * backGround;
 	lv_obj_t * btn[NR_ITEMS];
 	lv_obj_t * label[NR_ITEMS];
 	StatusLine * statusLine;

@@ -9,7 +9,16 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "MeasScreen.h"
+#include <stdio.h>
 //#include "guiCommonTask.h"
+
+#ifdef LGL_SIMULATOR
+#include "lv_drv_conf.h"
+#define LV_HOR_RES_MAX 	SDL_HOR_RES
+#define LV_VER_RES_MAX SDL_VER_RES
+#else
+	#include "../lvgl_esp32_drivers/lvgl_helpers.h"
+#endif
 
 // fonts Ohm, micro  0x3A9,0x3BC 01234567890 -.,mMnkVAHz
 
@@ -35,11 +44,38 @@ extern lv_font_t insloata100_4bppSub;
 
 volatile bool MeasScreen::active;
 
+int cntr ;
+
+bool doCalibrate;
+
+void MeasScreen::screenClicked( lv_event_t *event) {
+	cntr++;
+	char txt[20];
+	sprintf( txt, "%d", cntr);
+	doCalibrate = true;
+//	lv_label_set_text(label[1],txt);
+}
+
+
+
 MeasScreen::MeasScreen() {
 	static lv_style_t style_red;
 	static lv_style_t style_green;
 	static lv_style_t style_blue;
 	static lv_style_t style_white;
+	static lv_style_t style_background;
+
+	lv_style_init(&style_white);
+
+
+	lv_style_init(&style_background);
+	lv_style_set_bg_color(&style_background, lv_color_black());
+	backGround =  lv_obj_create(lv_scr_act());
+
+    lv_obj_set_size(backGround, LV_HOR_RES_MAX, LV_VER_RES_MAX);
+    lv_obj_set_pos(backGround, 0, 0);
+    lv_obj_add_style (backGround,&style_background,0);
+    lv_obj_add_event_cb(backGround, screenClicked, LV_EVENT_CLICKED, NULL);   /*Assign an event callback*/
 
 //	vTaskDelay((500 / portTICK_PERIOD_MS));
 
@@ -68,28 +104,21 @@ MeasScreen::MeasScreen() {
 	lv_style_set_text_color(&style_blue, c);
 
 	for (int n = 0; n < NR_ITEMS; n++) {
-		btn[n] = lv_btn_create(lv_scr_act());
+		btn[n] = lv_btn_create(backGround);
 		lv_obj_set_pos(btn[n], PADDING, n * (ITEMHEIGHT + PADDING) + PADDING);
 		lv_obj_set_size(btn[n], ITEMWIDTH, ITEMHEIGHT);
 		lv_obj_add_style(btn[n], &style_green, 0);
 		label[n] = lv_label_create(btn[n]);
 		lv_label_set_text(label[n], "---");
 		lv_obj_center(label[n]);
-	}
+		lv_obj_add_event_cb(btn[n], screenClicked, LV_EVENT_CLICKED, NULL);
 
+	}
+	//lv_obj_add_event_cb(btn[0], screenClicked, LV_EVENT_CLICKED, NULL);   /*Assign an event callback*/
 	statusLine = new StatusLine(lv_scr_act());
 }
 
-void MeasScreen::event_handler(lv_obj_t *obj, lv_event_t event) {
-//	uint32_t key;
-//	if ( event == LV_EVENT_KEY ){
-//		key = lv_indev_get_key(kb_indev);
-//		if ( key == LV_KEY_ENTER)
-//			active = false;
-//		else
-//			xQueueSend(keyEventQueue, &key, 0);  // send key to dmm task
-//	}
-}
+
 
 void MeasScreen::setDisplayText(int line, const char *text) {
 	int len = strlen(text);

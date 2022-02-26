@@ -15,6 +15,7 @@ typedef struct {
 }wifiSettings_t;
 
 extern wifiSettings_t wifiSettings;
+extern char ipstr[];
 
 void connect (TaskHandle_t *);
 
