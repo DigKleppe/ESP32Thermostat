@@ -22,7 +22,7 @@
 
 // fonts 0x5E 0xB0 0123456789 :-.,C%
 //https://lvgl.io/tools/fontconverter
-#define LV_TICK_PERIOD_MS 30
+#define LV_TICK_PERIOD_MS 10
 
 
 extern "C" {

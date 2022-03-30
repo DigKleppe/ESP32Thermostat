@@ -14,7 +14,7 @@
 
 /*
 . /home/dig/esp/esp-idf/export.sh
-idf.py monitor -p /dev/tttUSB0
+idf.py monitor -p /dev/ttyUSB0
 
 -s ${openocd_path}/share/openocd/scripts -f interface/ftdi/esp32_devkitj_v1.cfg -f target/esp32.cfg -c "program_esp /mnt/linuxData/projecten/git/thermostaat/SensirionSCD30/build//app.bin 0x10000 verify"
 
@@ -42,6 +42,8 @@ idf.py monitor -p /dev/tttUSB0
 #include "guiTask.h"
 #include "guiCommonTask.h"
 #include "Arduino.h"
+
+
 
 void guiTask(void *pvParameter);
 
@@ -100,7 +102,6 @@ void app_main() {
 	char str2[25];
 	int cntr=1;
 	int dummy = 0;
-	int backlight = 10;
 
 	displayMssg_t displayMssg;
 	displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
@@ -147,7 +148,7 @@ void app_main() {
 	while ( ! displayReady )
 		vTaskDelay (10/portTICK_PERIOD_MS);
 
-	setBacklight(20);
+	setBacklight(40);
 
 	while(1) {
 

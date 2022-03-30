@@ -10,9 +10,14 @@
 #include "MeasScreen.h"
 //#include "MenuSettings.h"
 //#include "MessageScreen.h"
+#include "SettingsScreen.h"
+#include "MainScreen.h"
+
 #include "guiTask.h"
 #include "guiCommonTask.h"
-//extern "C" {
+#include "SettingsScreen.h"
+
+//extern "C" {      if ( timer++ == 200) {
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -29,6 +34,7 @@ QueueHandle_t displayReadyMssgBox;
 void guiTask(void *pvParameter) {
 	displayMssg_t recDdisplayMssg;
 	int dummy;
+	int step = 0;
 
 	displayMssgBox = xQueueCreate(5, sizeof(displayMssg_t));
 	displayReadyMssgBox = xQueueCreate(1, sizeof(uint32_t));
@@ -37,10 +43,38 @@ void guiTask(void *pvParameter) {
 	while (	!displayReady)
 		vTaskDelay(100/portTICK_RATE_MS);
 
+	MainScreen mainScreen;
+	SettingsScreen settingsScreen;
 	MeasScreen measScreen;
-//	MenuSettings menuSettings;
-//	MessageScreen messageScreen;
-	measScreen.show();
+
+	vTaskDelay( 100/portTICK_PERIOD_MS);
+	settingsScreen.show();
+
+	while (1) {
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+		switch (step) {
+		case 0:
+			mainScreen.show();
+			break;
+
+		case 1:
+			settingsScreen.show();
+			break;
+
+		case 2:
+			measScreen.show();
+			step = -1;
+			break;
+
+		default:
+			break;
+		};
+		step++;
+	}
+
+
+
 
 	while (1) {
 		if (xQueueReceive(displayMssgBox, &recDdisplayMssg, 0) == pdTRUE) {

@@ -234,19 +234,6 @@ int readDescriptorsScript(char *pBuffer, int count) {
 	return 0;
 }
 
-int doCalibrateScript(char *pBuffer, int count) {
-switch (scriptState) {
-case 0:
-	scriptState++;
-	strcpy (pBuffer,"Ok");
-	return 3;
-
-	break;
-default:
-	break;
-}
-return 0;
-}
 
 
 

@@ -8,17 +8,11 @@
  *********************/
 #include <stdlib.h>
 #include <unistd.h>
-#include "MeasScreen.h"
+#include "MainScreen.h"
 #include <stdio.h>
-//#include "guiCommonTask.h"
+#include "guiCommonTask.h"
 
-#ifdef LGL_SIMULATOR
-#include "lv_drv_conf.h"
-#define LV_HOR_RES_MAX 	SDL_HOR_RES
-#define LV_VER_RES_MAX SDL_VER_RES
-#else
-	#include "../lvgl_esp32_drivers/lvgl_helpers.h"
-#endif
+
 
 // fonts Ohm, micro  0x3A9,0x3BC 01234567890 -.,mMnkVAHz
 
@@ -34,17 +28,17 @@ extern lv_font_t dejaVuSansMono50;
 extern lv_font_t dejaVuSansMono904bpp;
 extern lv_font_t dejaVuSansMono904bppSub;
 
+//extern lv_font_t  lv_font_montserrat_40;
+
 extern lv_font_t insloata100_4bppSub;
 //#define FONT &dejaVuSansMono904bppSub
 #define FONT &insloata100_4bppSub
 
+
+
 #define PADDING 10
 #define ITEMHEIGHT	95
 #define ITEMWIDTH	300
-
-volatile bool MeasScreen::active;
-
-int cntr ;
 
 
 static void album_gesture_event_cb(lv_event_t * e)
@@ -53,18 +47,12 @@ static void album_gesture_event_cb(lv_event_t * e)
     printf("Dir: %d\n", dir);
 }
 
-void MeasScreen::screenClicked( lv_event_t * e) {
-	cntr++;
-	char txt[20];
-	sprintf( txt, "%d", cntr);
-	printf("Clicked\n\r");
+float tempSetPoint = 20.0;  //
+float offset = -0;
+int tempDegr = 20;
+int tempTens = 0;
 
-	if (e->code  == LV_EVENT_GESTURE) {
-		lv_dir_t dir = lv_indev_get_gesture_dir(lv_indev_get_act());
-	     printf("Dir: %d\n", dir);
-	 }
-//	lv_label_set_text(label[1],txt);
-}
+
 
 //void scr_event_cb(lv_obj_t * obj, lv_event_t e)
 //{
@@ -74,19 +62,29 @@ void MeasScreen::screenClicked( lv_event_t * e) {
 //    }
 //}
 
+MainScreen::MainScreen() {
 
-MeasScreen::MeasScreen() {
+	screen = lv_obj_create(NULL);
 	static lv_style_t style_red;
 	static lv_style_t style_green;
 	static lv_style_t style_blue;
 	static lv_style_t style_white;
 	static lv_style_t style_background;
-	screen = lv_obj_create(NULL);
+
+	SpinBoxDescr_t spinBoxDescrTemperatuur = {
+		{.name = "  gewenste temperatuur:" },
+		{.format = "%2.1f"},
+		.maxVal = 25.0,
+		.minVal = 10.0,
+		.step = 0.1,
+		.var = &tempSetPoint,
+	};
+
 	lv_style_init(&style_white);
 
 
 	lv_style_init(&style_background);
-	lv_style_set_bg_color(&style_background, lv_color_black());
+	lv_style_set_bg_color(&style_background, lv_color_white());
 	backGround =  lv_obj_create(screen);
 
     lv_obj_set_size(backGround, LV_HOR_RES_MAX, LV_VER_RES_MAX);
@@ -126,26 +124,37 @@ MeasScreen::MeasScreen() {
 	c = lv_color_make(0, 0, 255);
 	lv_style_set_text_color(&style_blue, c);
 
-	for (int n = 0; n < NR_ITEMS; n++) {
-		btn[n] = lv_btn_create(backGround);
-		lv_obj_set_pos(btn[n], PADDING, n * (ITEMHEIGHT + PADDING) + PADDING);
-		lv_obj_set_size(btn[n], ITEMWIDTH-2*PADDING, ITEMHEIGHT-PADDING);
-		lv_obj_add_style(btn[n], &style_green, 0);
-		label[n] = lv_label_create(btn[n]);
-		lv_label_set_text(label[n], "---");
-		lv_obj_center(label[n]);
-		lv_obj_add_event_cb(btn[n], screenClicked,(lv_event_code_t)LV_EVENT_GESTURE, NULL);
-	//	lv_obj_add_event_cb(btn[n], album_gesture_event_cb,(lv_event_code_t)LV_EVENT_GESTURE, NULL);
+	spinBoxTemperatuur = new SpinBox(screen );
+
+	spinBoxTemperatuur-> init(&spinBoxDescrTemperatuur, 200);
 
 
-	}
+//	lv_ex_spinbox_1();
+
+
+
+
+//
+//	for (int n = 0; n < NR_ITEMS; n++) {
+//		btn[n] = lv_btn_create(backGround);
+//		lv_obj_set_pos(btn[n], PADDING, n * (ITEMHEIGHT + PADDING) + PADDING);
+//		lv_obj_set_size(btn[n], ITEMWIDTH-2*PADDING, ITEMHEIGHT-PADDING);
+//		lv_obj_add_style(btn[n], &style_green, 0);
+//		label[n] = lv_label_create(btn[n]);
+//		lv_label_set_text(label[n], "---");
+//		lv_obj_center(label[n]);
+//		lv_obj_add_event_cb(btn[n], screenClicked,(lv_event_code_t)LV_EVENT_GESTURE, NULL);
+//	//	lv_obj_add_event_cb(btn[n], album_gesture_event_cb,(lv_event_code_t)LV_EVENT_GESTURE, NULL);
+//
+//
+//	}
 	//lv_obj_add_event_cb(btn[0], screenClicked, LV_EVENT_CLICKED, NULL);   /*Assign an event callback*/
-	statusLine = new StatusLine(lv_scr_act());
+	statusLine = new StatusLine(screen);
 }
 
 
 
-void MeasScreen::setDisplayText(int line, const char *text) {
+void MainScreen::setDisplayText(int line, const char *text) {
 	int len = strlen(text);
 
 	if (len >= MAXVALUECHARS)
@@ -163,7 +172,7 @@ void MeasScreen::setDisplayText(int line, const char *text) {
  * @param value
  * @param name
  */
-void MeasScreen::setValueAndName(int line, const char *value, const char *name) {
+void MainScreen::setValueAndName(int line, const char *value, const char *name) {
 	bool hasSymbol = false;
 	int valLen = strlen(value);
 	int nameLen = 0;
@@ -205,26 +214,26 @@ void MeasScreen::setValueAndName(int line, const char *value, const char *name) 
 	}
 }
 
-void MeasScreen::setStatusLine(const char *text) {
+void MainScreen::setStatusLine(const char *text) {
 	statusLine->setText(text);
 }
 
-void MeasScreen::show() {
+void MainScreen::show() {
 	lv_scr_load(screen);
 //	lv_indev_set_group(kb_indev ,g);
-	active = true;
+//	active = true;
 }
 
-void MeasScreen::setColors(lv_color_t bgColor, lv_color_t textColor) {
+void MainScreen::setColors(lv_color_t bgColor, lv_color_t textColor) {
 //	lv_style_set_bg_color(&measStyle1, LV_STATE_DEFAULT, bgColor);
 //	lv_style_set_text_color(&measStyle1, LV_STATE_DEFAULT, textColor);
 }
 
-MeasScreen::~MeasScreen() {
+MainScreen::~MainScreen() {
 	// TODO Auto-generated destructor stub
 }
 
-void makeMeasScreen(void) {
+void makeMainScreen(void) {
 
 }
 

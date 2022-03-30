@@ -5,8 +5,8 @@
  *      Author: dig
  */
 
-#ifndef COMPONENTS_GUI_MEASSCREEN_H_
-#define COMPONENTS_GUI_MEASSCREEN_H_
+#ifndef COMPONENTS_GUI_MAINSCREEN_H_
+#define COMPONENTS_GUI_MAINSCREEN_H_
 
 #ifdef LV_CONF_INCLUDE_SIMPLE
 #include "lvgl.h"
@@ -18,16 +18,17 @@
 //#include "Stream.h"
 
 #include "StatusLine.h"
+#include "SpinBox.h"
 
 #define LV_SYMBOL_OHM    "\xef\xCE\xA9"  //0x3A9
 #define LV_SYMBOL_MICRO  "\xef\xCE\xBC" //0x3BC
 
 #define NR_ITEMS 3
 
-class MeasScreen { //public Stream{
+class MainScreen { //public Stream{
 public:
-	MeasScreen();
-	virtual ~MeasScreen();
+	MainScreen();
+	virtual ~MainScreen();
 	static const int MAXVALUECHARS = 8;
 	void show();
 	void setDisplayText(int line , const  char * text);
@@ -35,9 +36,6 @@ public:
 	void setColors (lv_color_t bgcolor, lv_color_t textcolor);
 	void setStatusLine (const char * text);
 	static volatile bool active;
-
-	lv_obj_t * screen;
-
 
 //    int read(void);
 //    size_t read(uint8_t *buffer, size_t size);
@@ -83,6 +81,9 @@ private:
 	lv_obj_t * btn[NR_ITEMS];
 	lv_obj_t * label[NR_ITEMS];
 	StatusLine * statusLine;
+	SpinBox * spinBoxTemperatuur;
+	lv_obj_t * screen;
+
 };
 
 #endif /* COMPONENTS_GUI_MEASSCREEN_H_ */
