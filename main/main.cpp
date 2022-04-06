@@ -9,12 +9,14 @@
  * CONDITIONS OF ANY KIND, either express or implied.
  *
  * https://vuetifyjs.com/en/styles/colors/#material-colors
+ *
+ *
  */
 
 
 /*
 . /home/dig/esp/esp-idf/export.sh
-idf.py monitor -p /dev/ttyUSB0
+idf.py monitor -p /dev/ttyUSB2
 
 -s ${openocd_path}/share/openocd/scripts -f interface/ftdi/esp32_devkitj_v1.cfg -f target/esp32.cfg -c "program_esp /mnt/linuxData/projecten/git/thermostaat/SensirionSCD30/build//app.bin 0x10000 verify"
 
@@ -42,7 +44,7 @@ idf.py monitor -p /dev/ttyUSB0
 #include "guiTask.h"
 #include "guiCommonTask.h"
 #include "Arduino.h"
-
+#include "clockTask.h"
 
 
 void guiTask(void *pvParameter);
@@ -142,8 +144,9 @@ void app_main() {
     xTaskCreatePinnedToCore(guiCommonTask, "guicommon", 4096*2, NULL, 0, &guiCommonTaskh, 1);
 	xTaskCreatePinnedToCore(guiTask, "guiTask", 4096 , NULL, 0, &guiTaskh, 1);
 	xTaskCreate(sensirionTask, "sensirionTask", 2048, NULL, 0, &SensirionTaskh);
-
 	connect(&connectTaskh);
+
+	xTaskCreate(clockTask, "clock", 2*1024, NULL, 0, NULL);
 
 	while ( ! displayReady )
 		vTaskDelay (10/portTICK_PERIOD_MS);

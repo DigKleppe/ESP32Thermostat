@@ -23,6 +23,8 @@
 #include "freertos/task.h"
 #include "freertos/semphr.h"
 
+#include "styles.h"
+
 //extern MenuSetttingsDesrc_t DMMSettingsDescrTable[];
 extern "C" void disp_wait_for_pending_transactions(void);
 
@@ -30,6 +32,44 @@ userState_t userState = USER_STATE_RUN;
 
 QueueHandle_t displayMssgBox;
 QueueHandle_t displayReadyMssgBox;
+
+SettingsScreen *settingsScreen;
+MainScreen *mainScreen;
+MeasScreen *measScreen;
+
+int screenIdx;
+
+#define NRSCREENS 3
+
+void showScreen(int idx) {
+	switch (idx) {
+	case 0:
+		measScreen->show();
+		break;
+	case 1:
+		mainScreen->show();
+		break;
+	case 2:
+		settingsScreen->show();
+		break;
+
+	default:
+		break;
+
+	}
+}
+
+void nextScreenClick(lv_event_t *e) {  // from navigArrows
+	if (screenIdx < (NRSCREENS - 1))
+		screenIdx++;
+	showScreen(screenIdx);
+}
+
+void prevScreenClick(lv_event_t *e) {  // from navigArrows
+	if (screenIdx > 0)
+		screenIdx--;
+	showScreen(screenIdx);
+}
 
 void guiTask(void *pvParameter) {
 	displayMssg_t recDdisplayMssg;
@@ -39,53 +79,58 @@ void guiTask(void *pvParameter) {
 	displayMssgBox = xQueueCreate(5, sizeof(displayMssg_t));
 	displayReadyMssgBox = xQueueCreate(1, sizeof(uint32_t));
 
+	initStyles();
 
-	while (	!displayReady)
-		vTaskDelay(100/portTICK_RATE_MS);
-
-	MainScreen mainScreen;
-	SettingsScreen settingsScreen;
-	MeasScreen measScreen;
-
-	vTaskDelay( 100/portTICK_PERIOD_MS);
-	settingsScreen.show();
-
-	while (1) {
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-		switch (step) {
-		case 0:
-			mainScreen.show();
-			break;
-
-		case 1:
-			settingsScreen.show();
-			break;
-
-		case 2:
-			measScreen.show();
-			step = -1;
-			break;
-
-		default:
-			break;
-		};
-		step++;
-	}
+	while (!displayReady)
+		vTaskDelay(100 / portTICK_RATE_MS);
 
 
 
+	settingsScreen = new SettingsScreen();
+	mainScreen = new MainScreen();
+	measScreen = new MeasScreen();
 
+	showScreen(0);
+
+
+//	vTaskDelay( 100/portTICK_PERIOD_MS);
+//	settingsScreen.show();
+//
+//	while (1) {
+//		vTaskDelay(1000 / portTICK_PERIOD_MS);
+//
+//		switch (step) {
+//		case 0:
+//			mainScreen.show();
+//			break;
+//
+//		case 1:
+//			settingsScreen.show();
+//			break;
+//
+//		case 2:
+//			measScreen.show();
+//			step = -1;
+//			break;
+//
+//		default:
+//			break;
+//		};
+//		step++;
+//	}
+//
 	while (1) {
 		if (xQueueReceive(displayMssgBox, &recDdisplayMssg, 0) == pdTRUE) {
 			if (pdTRUE == xSemaphoreTake(xGuiSemaphore, portMAX_DELAY)) {
 				switch (recDdisplayMssg.displayItem) {
 				case DISPLAY_ITEM_STATUSLINE:
-					measScreen.setStatusLine((const char *)recDdisplayMssg.str1);
+//					measScreen.setStatusLine(
+//							(const char*) recDdisplayMssg.str1);
 					break;
 
 				case DISPLAY_ITEM_MEASLINE:
-					measScreen.setValueAndName(recDdisplayMssg.line, (const char*) recDdisplayMssg.str1, (const char*) recDdisplayMssg.str2);    //," "  LV_SYMBOL_MICRO "V");
+					measScreen->setValueAndName(recDdisplayMssg.line,(const char*) recDdisplayMssg.str1,
+							(const char*) recDdisplayMssg.str2);
 					break;
 				case DISPLAY_ITEM_STOP:
 				case DISPLAY_ITEM_COLOR:

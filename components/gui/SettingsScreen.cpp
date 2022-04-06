@@ -24,24 +24,14 @@
 
 
 userSettings_t 	userSettings;
-//extern lv_font_t  lv_font_montserrat_40;
-
-extern lv_font_t insloata100_4bppSub;
-//#define FONT &dejaVuSansMono904bppSub
-#define FONT &insloata100_4bppSub
-
-//void scr_event_cb(lv_obj_t * obj, lv_event_t e)
-//{
-//    if(e == LV_EVENT_GESTURE) {
-//        lv_gesture_dir_t dir = lv_indev_get_gesture_dir(lv_indev_get_act());
-//        printf("Dir: %d\n", dir);
-//    }
-//}
 
 
 
 SettingsScreen::SettingsScreen() {
+
 	settingsScreen = lv_obj_create(NULL);
+	backGround =  makeBackGround(settingsScreen);
+
 	SpinBoxDescr_t spinBoxDescr[4] = {
 		{{.name = "  temperatuur offset:" },
 		{.format = "%2.1f"},
@@ -75,14 +65,14 @@ SettingsScreen::SettingsScreen() {
 	};
 
 	for ( int n = 0; n < NR_SPINBOXES; n++){
-		spinBox[n] = new SpinBox( settingsScreen);
-		spinBox[n]->init(&spinBoxDescr[n],5+  n*SPINBOXHEIGHT);
+		spinBox[n] = new SpinBox( backGround);
+		spinBox[n]->init(&spinBoxDescr[n],  n*SPINBOXHEIGHT);
 #ifndef LGL_SIMULATOR
 		vTaskDelay(50/portTICK_PERIOD_MS);
 #endif
 
 	}
-	navigArrows = new NavigArrows(settingsScreen, true, true);
+	navigArrows = new NavigArrows(backGround, true, true);
 
 }
 

@@ -7,23 +7,8 @@
 
 #include "SpinBox.h"
 #include <stdio.h>
-
-extern lv_font_t insloata100_4bppSub;
-//#define FONT &dejaVuSansMono904bppSub
-//#define FONT &insloata100_4bppSub
-
-LV_FONT_DECLARE(lv_font_montserrat_44)
-#define SPINBUTTONFONT	lv_font_montserrat_44
-#define FONT SPINBUTTONFONT
-
-LV_FONT_DECLARE(lv_font_montserrat_18)
-#define SPINBUTTONNAMEFONT	lv_font_montserrat_18
-
-static lv_style_t styleSpin;
-static lv_style_t styleSpinButtonName;
-static lv_style_t styleSpinButton;
-static bool styleIsSet;
-
+#include "fonts.h"
+#include "styles.h"
 
 
 static void lv_spinbox_increment_event_cb(lv_event_t * e)
@@ -69,41 +54,12 @@ void SpinBox::init ( SpinBoxDescr_t * desc, int y)
 	lv_obj_t * namelabel;
 	myDesc = *desc;
 
-	if (!styleIsSet) {
-		styleIsSet = true;
-		lv_style_init(&styleSpin);
-		lv_style_set_bg_color(&styleSpin, lv_color_black());
-		lv_style_set_text_font(&styleSpin, &FONT);
-
-		lv_color_t c = lv_color_make(255, 255, 0);
-		lv_style_set_text_color(&styleSpin, c);
-		lv_style_set_radius(&styleSpin, 5);
-		lv_style_set_bg_opa(&styleSpin, LV_OPA_COVER);
-		lv_style_set_border_width(&styleSpin, 2);
-		lv_style_set_border_color(&styleSpin, lv_palette_main(LV_PALETTE_GREY));
-
-		lv_style_init(&styleSpinButtonName);
-		lv_style_set_bg_color(&styleSpinButtonName,
-				lv_palette_main(LV_PALETTE_BLUE));
-		lv_style_set_text_font(&styleSpinButtonName, &SPINBUTTONNAMEFONT);
-		c = lv_color_make(0, 0, 255);
-		lv_style_set_text_color(&styleSpinButtonName, c);
-
-		lv_style_init(&styleSpinButton);
-		lv_style_set_bg_color(&styleSpinButton,
-		lv_palette_main(LV_PALETTE_BLUE));
-		lv_style_set_text_font(&styleSpinButton, &SPINBUTTONFONT);
-		c = lv_color_make(255, 255, 0);
-		lv_style_set_text_color(&styleSpinButton, c);
-	}
-
 //// name label
 	if ( strlen(myDesc.name) >0 ){
 		namelabel = lv_label_create ( _parent);//  lv_spinbox_create(parent);
-	//	h = SPINBUTTONNAMEFONT.line_height;
-	//	lv_obj_set_size(namelabel, LV_HOR_RES_MAX, h+ 3);
+	//	lv_obj_set_pos( namelabel, 20,y);
+		lv_obj_align(namelabel, LV_ALIGN_CENTER, 0, (-(LV_VER_RES_MAX/2)) +spinBoxButtonHeigth/2 + y -20 );
 
-		lv_obj_set_pos( namelabel, 20,y);
 		lv_label_set_text(namelabel,myDesc.name);
 		lv_obj_add_style( namelabel, &styleSpinButtonName,0);
 	}
@@ -112,20 +68,19 @@ void SpinBox::init ( SpinBoxDescr_t * desc, int y)
 	label = lv_label_create ( _parent);//  lv_spinbox_create(parent);
 
 	h = SPINBUTTONFONT.line_height;
+// value
 
 	lv_obj_set_size(label, 140,h + 5);
-//	lv_obj_set_size(label, 140,spinBoxHeigth);
-	if ( strlen(myDesc.name) >0 )
-		lv_obj_set_pos( label, (LV_HOR_RES_MAX-140)/2, y +spinBoxButtonHeigth/2 -5);
-	else
-		lv_obj_set_pos( label, (LV_HOR_RES_MAX-140)/2, y);
+//	if ( strlen(myDesc.name) >0 )
+//		lv_obj_set_pos( label, (LV_HOR_RES_MAX-140)/2, y +spinBoxButtonHeigth/2 -5);
+//	else
+//		lv_obj_set_pos( label, (LV_HOR_RES_MAX-140)/2, y);
+	lv_obj_align(label, LV_ALIGN_CENTER, 0, (-(LV_VER_RES_MAX/2)) +spinBoxButtonHeigth/2 + y + 28);
 	lv_obj_add_style( label, &styleSpin,0);
 	lv_obj_set_style_text_align(label, LV_TEXT_ALIGN_CENTER, 0);
 	myDesc.label = label;
 
-
 	buttonP = lv_btn_create(_parent);
-	// lv_obj_set_size(btn, h, h);
 	lv_obj_set_size(buttonP, spinBoxButtonWidth,  spinBoxButtonHeigth);
 	lv_obj_align_to(buttonP, label, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
 
@@ -138,7 +93,6 @@ void SpinBox::init ( SpinBoxDescr_t * desc, int y)
 	lv_obj_add_event_cb(buttonP, lv_spinbox_increment_event_cb, LV_EVENT_ALL, this);
 
 	buttonM = lv_btn_create(_parent);
-	// lv_obj_set_size(btn, h, h);
 	lv_obj_set_size(buttonM,spinBoxButtonWidth, spinBoxButtonHeigth);
 	lv_obj_align_to(buttonM, label, LV_ALIGN_OUT_LEFT_MID, -5, 0);
 

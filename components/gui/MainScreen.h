@@ -17,8 +17,10 @@
 
 //#include "Stream.h"
 
-#include "StatusLine.h"
+//#include "StatusLine.h"
 #include "SpinBox.h"
+#include "NavigArrows.h"
+#include "ClockDisplay.h"
 
 #define LV_SYMBOL_OHM    "\xef\xCE\xA9"  //0x3A9
 #define LV_SYMBOL_MICRO  "\xef\xCE\xBC" //0x3BC
@@ -37,42 +39,6 @@ public:
 	void setStatusLine (const char * text);
 	static volatile bool active;
 
-//    int read(void);
-//    size_t read(uint8_t *buffer, size_t size);
-//    inline size_t read(char * buffer, size_t size)
-//    {
-//        return read((uint8_t*) buffer, size);
-//    }
-//    void flush(void);
-//    void flush( bool txOnly);
-//    size_t write(uint8_t);
-//    size_t write(const uint8_t *buffer, size_t size);
-//    inline size_t write(const char * buffer, size_t size)
-//    {
-//        return write((uint8_t*) buffer, size);
-//    }
-//    inline size_t write(const char * s)
-//    {
-//        return write((uint8_t*) s, strlen(s));
-//    }
-//    inline size_t write(unsigned long n)
-//    {
-//        return write((uint8_t) n);
-//    }
-//    inline size_t write(long n)
-//    {
-//        return write((uint8_t) n);
-//    }
-//    inline size_t write(unsigned int n)
-//    {
-//        return write((uint8_t) n);
-//    }
-//    inline size_t write(int n)
-//    {
-//        return write((uint8_t) n);
-//    }
-//
-
 private:
 	char  measValue1[MAXVALUECHARS+3]; // extra space for a symbol (3 characters)
 	static void event_handler(lv_obj_t * obj, lv_event_t event);
@@ -80,10 +46,11 @@ private:
 	lv_obj_t * backGround;
 	lv_obj_t * btn[NR_ITEMS];
 	lv_obj_t * label[NR_ITEMS];
-	StatusLine * statusLine;
+//	StatusLine * statusLine;
 	SpinBox * spinBoxTemperatuur;
 	lv_obj_t * screen;
-
+	NavigArrows * navigArrows;
+	ClockDisplay * clockDisplay;
 };
 
 #endif /* COMPONENTS_GUI_MEASSCREEN_H_ */

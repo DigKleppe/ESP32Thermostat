@@ -13,7 +13,7 @@ ENDMACRO()
 HEADER_DIRECTORIES(header_dir_list)
 idf_component_register(SRCS ${SOURCES}
                        INCLUDE_DIRS .
-                       REQUIRES lvgl )
-                 
-          
-          
+               	       REQUIRES lvgl )
+               	      
+               
+                   

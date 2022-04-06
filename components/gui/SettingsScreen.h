@@ -10,6 +10,7 @@
 
 #include "SpinBox.h"
 #include "NavigArrows.h"
+#include "backGround.h"
 
 const int NR_SPINBOXES =  4;
 
@@ -19,6 +20,7 @@ public:
 	virtual ~SettingsScreen();
 	void show();
 private:
+	lv_obj_t * backGround;
 	SpinBox * spinBox[NR_SPINBOXES];
 	NavigArrows * navigArrows;
 	lv_obj_t * settingsScreen;

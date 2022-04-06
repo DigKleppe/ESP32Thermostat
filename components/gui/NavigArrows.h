@@ -14,11 +14,14 @@
 #include "lvgl/lvgl.h"
 #endif
 
+#include "styles.h"
 
 class NavigArrows {
 public:
-	NavigArrows(lv_obj_t * parent, bool right, bool left);
+	NavigArrows(lv_obj_t * parent, bool right, bool left,  lv_style_t* style = &styleNavArrows );
 	virtual ~NavigArrows();
+	void setStyle(lv_style_t * style);
+
 private:
 	lv_obj_t * buttonRight;
 	lv_obj_t * buttonLeft;

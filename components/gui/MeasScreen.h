@@ -17,7 +17,10 @@
 
 //#include "Stream.h"
 
-#include "StatusLine.h"
+//#include "StatusLine.h"
+#include "NavigArrows.h"
+#include  "ClockDisplay.h"
+#include "MeasDisplay.h"
 
 #define LV_SYMBOL_OHM    "\xef\xCE\xA9"  //0x3A9
 #define LV_SYMBOL_MICRO  "\xef\xCE\xBC" //0x3BC
@@ -28,16 +31,15 @@ class MeasScreen { //public Stream{
 public:
 	MeasScreen();
 	virtual ~MeasScreen();
-	static const int MAXVALUECHARS = 8;
+	static const int MAXVALUECHARS = 4;
 	void show();
-	void setDisplayText(int line , const  char * text);
-	void setValueAndName( int line , const char * value, const char * name);
-	void setColors (lv_color_t bgcolor, lv_color_t textcolor);
-	void setStatusLine (const char * text);
-	static volatile bool active;
+	void setDisplayText(int line , char * text);
+	void setDisplayValue(int line , float value);
+	void setDisplayValue(int line , int value);
+	void setValueAndName(int line, const char *value, const char *name);
+//	void setStatusLine (const char * text);
 
 	lv_obj_t * screen;
-
 
 //    int read(void);
 //    size_t read(uint8_t *buffer, size_t size);
@@ -80,9 +82,14 @@ private:
 	static void event_handler(lv_obj_t * obj, lv_event_t event);
 	static void screenClicked(lv_event_t * event);
 	lv_obj_t * backGround;
-	lv_obj_t * btn[NR_ITEMS];
+	lv_obj_t * valueLabel[NR_ITEMS];
 	lv_obj_t * label[NR_ITEMS];
-	StatusLine * statusLine;
+//	StatusLine * statusLine;
+	NavigArrows * navigArrows;
+	ClockDisplay * clockDisplay;
+	MeasDisplay * measDisplay[NR_ITEMS ];
+
+
 };
 
 #endif /* COMPONENTS_GUI_MEASSCREEN_H_ */

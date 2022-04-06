@@ -17,7 +17,9 @@
 #define LV_SYMBOL_OHM    "\xef\xCE\xA9"  //0x3A9
 #define LV_SYMBOL_MICRO  "\xef\xCE\xBC" //0x3BC
 
-const char units[4][7] { "^ppm", "^" "\xB0" "C", "^%", "" };
+//const char units[4][7] { "^ppm", "^" "\xB0" "C", "^%", "" };
+
+static const char * units[] = { "\xC2\xB0" "C", "%" ,"ppm"};
 
 extern int scriptState;
 extern SemaphoreHandle_t I2CSemaphore;  // used by lvgl, shares the same bus
@@ -104,10 +106,6 @@ void sensirionTask(void *pvParameter) {
 	while( displayMssgBox == NULL){ // wait for display
 		vTaskDelay(100 / portTICK_PERIOD_MS);
 	}
-
-	xQueueSend(displayMssgBox, &displayMssg, 0);
-	xQueueReceive(displayReadyMssgBox, &dummy, 500/portTICK_PERIOD_MS); // if accepted wait until data is displayed
-
 	xSemaphoreTake(I2CSemaphore, portMAX_DELAY);
 	while (airSensor.begin(Wire,false, false) == false) {
 		Serial.println("Air sensor not detected");
@@ -143,22 +141,18 @@ void sensirionTask(void *pvParameter) {
 					sprintf( str2," %s", units[n]);
 					switch (n){
 					case 0:
-						sprintf(str, "%d",lastVal.co2);
-						break;
-					case 1:
 						sprintf(str, "%2.1f",lastVal.temperature);
 						break;
-					case 2:
+					case 1:
 						sprintf(str, "%2.1f",lastVal.hum);
 						break;
-					case 3:
-						sprintf(str, "%d", lastVal.timeStamp);
+					case 2:
+						sprintf(str, "%d",lastVal.co2);
 						break;
 					}
 					xQueueReceive(displayReadyMssgBox, &dummy, 0); // empty mssgbox
 					if ( xQueueSend( displayMssgBox, &displayMssg, 0 ) == pdPASS)
 						xQueueReceive(displayReadyMssgBox, &dummy, 500/portTICK_PERIOD_MS); // if accepted wait until data is displayed
-
 				}
 
 				Serial.print("co2(ppm):");
