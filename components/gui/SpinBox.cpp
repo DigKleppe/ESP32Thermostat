@@ -94,7 +94,7 @@ void SpinBox::init ( SpinBoxDescr_t * desc, int y)
 
 	buttonM = lv_btn_create(_parent);
 	lv_obj_set_size(buttonM,spinBoxButtonWidth, spinBoxButtonHeigth);
-	lv_obj_align_to(buttonM, label, LV_ALIGN_OUT_LEFT_MID, -5, 0);
+	lv_obj_align_to(buttonM, label, LV_ALIGN_OUT_LEFT_MID, -5, -15);
 
 	lbel = lv_label_create(buttonM);
 	lv_obj_add_style( lbel, &styleSpinButton,0);

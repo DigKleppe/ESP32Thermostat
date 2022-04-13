@@ -21,6 +21,7 @@
 #include "NavigArrows.h"
 #include  "ClockDisplay.h"
 #include "MeasDisplay.h"
+#include "StatusIndicator.h"
 
 #define LV_SYMBOL_OHM    "\xef\xCE\xA9"  //0x3A9
 #define LV_SYMBOL_MICRO  "\xef\xCE\xBC" //0x3BC
@@ -88,8 +89,7 @@ private:
 	NavigArrows * navigArrows;
 	ClockDisplay * clockDisplay;
 	MeasDisplay * measDisplay[NR_ITEMS ];
-
-
+	StatusIndicator* statusIndicator;
 };
 
 #endif /* COMPONENTS_GUI_MEASSCREEN_H_ */

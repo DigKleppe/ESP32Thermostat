@@ -130,6 +130,8 @@ void guiTask(void *pvParameter) {
 
 				case DISPLAY_ITEM_MEASLINE:
 					measScreen->setDisplayText(recDdisplayMssg.line,(char *) recDdisplayMssg.str1);
+					if ( recDdisplayMssg.line == 0)
+						mainScreen->setTemperatureDisplayText( (char *) recDdisplayMssg.str1 );
 					break;
 				case DISPLAY_ITEM_STOP:
 				case DISPLAY_ITEM_COLOR:

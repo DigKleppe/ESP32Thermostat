@@ -40,6 +40,13 @@ void MainScreen::event_handler(lv_event_t * e)
     }
 }
 
+void MainScreen::setTemperatureDisplayValue( float value) {
+	measDisplay->setValue ( value );
+}
+
+void MainScreen::setTemperatureDisplayText( char *text) {
+	measDisplay->setText (text);
+}
 
 MainScreen::MainScreen() {
 	screen = lv_obj_create(NULL);
@@ -54,14 +61,11 @@ MainScreen::MainScreen() {
 
 	backGround =  makeBackGround(screen);
 	clockDisplay = new ClockDisplay(backGround);
-	infoLabel  = lv_label_create ( backGround);
-	lv_obj_set_pos(infoLabel, 200, 5);
-	lv_obj_add_style(infoLabel, &styleInfo, 0);
-	lv_label_set_text(infoLabel, "\x66\x33\x43\x41");//  /*61587, 0xF093*/   LV_SYMBOL_OK).
+	statusIndicator = new StatusIndicator ( backGround);
+	measDisplay = new MeasDisplay(backGround, 40,"Temperatuur", "\xC2\xB0" "C", "%2.1f");
 
 	spinBoxTemperatuur = new SpinBox(backGround );
-	spinBoxTemperatuur-> init(&spinBoxDescrTemperatuur, 100);
-
+	spinBoxTemperatuur-> init(&spinBoxDescrTemperatuur, 150);
 
 	for (int n = 0; n < NR_CHECKBOXES; n++) {
 		cb[n] = lv_checkbox_create(screen);
@@ -69,13 +73,14 @@ MainScreen::MainScreen() {
 		lv_obj_add_event_cb(cb[n], event_handler, LV_EVENT_ALL, NULL);
 		lv_obj_add_style(cb[n], &styleSpinButtonName, 0);
 		lv_obj_set_user_data(cb[n], (void*) cbVar[n]);
-		lv_obj_set_pos(cb[n], 30, n * (80 + PADDING) + CLOCKDISPLAYHEIGHT + 170);
+		lv_obj_set_pos(cb[n], 30, n * (55 + PADDING) + CLOCKDISPLAYHEIGHT + 250);
 	}
 	navigArrows = new NavigArrows(backGround, true, true);
 }
 
 void MainScreen::setValues(mainScreenVars_t *p){
 	vars = *p;
+	measDisplay->setValue(p->temperature);
 	spinBoxTemperatuur->upDate();
 	if ( vars.heatingOn)
 		lv_obj_add_state(cb[CBHEATING], LV_STATE_CHECKED);
@@ -86,6 +91,8 @@ void MainScreen::setValues(mainScreenVars_t *p){
 		lv_obj_add_state(cb[CBCOOLING], LV_STATE_CHECKED);
 	else
 		lv_obj_clear_state(cb[CBCOOLING], LV_STATE_CHECKED);
+
+
 
 }
 

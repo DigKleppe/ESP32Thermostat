@@ -21,8 +21,11 @@
 #include "SpinBox.h"
 #include "NavigArrows.h"
 #include "ClockDisplay.h"
+#include "StatusIndicator.h"
+#include "MeasDisplay.h"
 
 typedef struct {
+	float temperature;
 	float tempSetPoint;
 	bool heatingOn;
 	bool coolingOn;
@@ -37,6 +40,8 @@ public:
 	void show();
 	void setValues( mainScreenVars_t * );
 	void getValues( mainScreenVars_t * );
+	void setTemperatureDisplayValue( float value);
+	void setTemperatureDisplayText ( char * text);
 	static const int MAXVALUECHARS = 8;
 
 private:
@@ -44,12 +49,16 @@ private:
 	static void event_handler(lv_obj_t * obj, lv_event_t event);
 	static void screenClicked(lv_event_t * event);
 	lv_obj_t * backGround;
+	MeasDisplay * measDisplay;
 	SpinBox * spinBoxTemperatuur;
 	lv_obj_t * cb[NR_CHECKBOXES];
 	lv_obj_t * screen;
 	lv_obj_t * infoLabel;
 	NavigArrows * navigArrows;
 	ClockDisplay * clockDisplay;
+	StatusIndicator* statusIndicator;
+
+
 	static void event_handler(lv_event_t * e);
 };
 
