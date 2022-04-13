@@ -24,6 +24,7 @@ extern lv_style_t styleSpin;
 extern lv_style_t styleSpinButtonName;
 extern lv_style_t styleSpinButton;
 extern lv_style_t styleClock;
+extern lv_style_t styleInfo;
 
 
 //  lv_palette_main(LV_PALETTE_GREY)
@@ -56,6 +57,11 @@ extern lv_style_t styleClock;
 #define CLOCKFONT					cantarelLight50// cantarel25 //lv_font_montserrat_20 //dejavusansEL44
 #define	CLOCKCOLOR					DEFAULTVALUECOLOR
 #define CLOCKBGCOLOR				DEFAULTBACKGROUNDCOLOR
+
+
+#define INFOFONT					AwsomeSymbols40
+#define INFOCOLOR					DEFAULTVALUECOLOR
+#define INFOBGCOLOR					DEFAULTBACKGROUNDCOLOR
 
 
 void initStyles (void);

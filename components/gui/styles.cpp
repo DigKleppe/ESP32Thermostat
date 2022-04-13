@@ -18,6 +18,7 @@ lv_style_t styleSpinButtonName;
 lv_style_t styleSpinButton;
 lv_style_t styleClock;
 
+lv_style_t styleInfo;
 
 void initStyles ( void){
 
@@ -81,6 +82,14 @@ void initStyles ( void){
 	lv_style_set_text_font(&styleClock, &CLOCKFONT);
 	lv_style_set_text_color(&styleClock, CLOCKCOLOR);
 	lv_style_set_bg_color(&styleClock, CLOCKBGCOLOR);
+
+
+	lv_style_init(&styleInfo);
+	lv_style_set_text_font(&styleInfo, &INFOFONT);
+	lv_style_set_text_color(&styleInfo, INFOCOLOR);
+	lv_style_set_bg_color(&styleInfo, INFOBGCOLOR);
+
+
 
 //	lv_style_set_radius(&styleClock, 5);
 //	lv_style_set_bg_opa(&styleClock, LV_OPA_COVER);

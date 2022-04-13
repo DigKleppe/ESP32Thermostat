@@ -14,7 +14,7 @@
 #include "lvgl/lvgl.h"
 #endif
 
-#define CLOCKDISPLAYHEIGHT 60
+#define CLOCKDISPLAYHEIGHT 40
 
 class ClockDisplay {
 public:

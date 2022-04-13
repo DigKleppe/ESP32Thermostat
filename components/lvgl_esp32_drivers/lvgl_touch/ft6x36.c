@@ -77,7 +77,7 @@ uint8_t ft6x36_get_gesture_id() {
 void ft6x06_init(uint16_t dev_addr) {
     if (!ft6x36_status.inited) {
 
-/* I2C master is initialized before calling this function */
+   /* I2C master is initialized before calling this function */
 #if 0
         esp_err_t code = i2c_master_init();
 #else
@@ -124,6 +124,7 @@ bool ft6x36_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     uint8_t touch_pnt_cnt;        // Number of detected touch points
     static int16_t last_x = 0;  // 12bit pixel value
     static int16_t last_y = 0;  // 12bit pixel value
+//	esp_log_level_set(TAG, ESP_LOG_VERBOSE);
 
     ft6x06_i2c_read8(current_dev_addr, FT6X36_TD_STAT_REG, &touch_pnt_cnt);
     if (touch_pnt_cnt != 1) {    // ignore no touch & multi touch
@@ -196,6 +197,7 @@ bool ft6x36_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     data->point.x = last_x;
     data->point.y = last_y;
     data->state = LV_INDEV_STATE_PR;
-    ESP_LOGV(TAG, "X=%u Y=%u", data->point.x, data->point.y);
+   // ESP_LOGV(TAG, "X=%u Y=%u", data->point.x, data->point.y);
+    ESP_LOGI(TAG, "X=%u Y=%u", data->point.x, data->point.y);
     return false;
 }

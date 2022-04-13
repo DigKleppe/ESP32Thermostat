@@ -30,7 +30,7 @@ void guiCommonTask(void *pvParameter);
 //extern lv_indev_t *kb_indev;
 
 void setBacklight ( int percent);
-
+void initGui( void);
 
 extern volatile bool displayReady;
 }

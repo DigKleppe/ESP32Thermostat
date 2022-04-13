@@ -123,6 +123,9 @@ void app_main() {
 //		vTaskDelay(100);
 //
 //	}
+
+
+
     ESP_LOGI(TAG, "start");
 	ESP_ERROR_CHECK(nvs_flash_init());
 	ESP_ERROR_CHECK(init_spiffs());
@@ -141,12 +144,15 @@ void app_main() {
 	/* If you want to use a task to create the graphic, you NEED to create a Pinned task
 	 * Otherwise there can be problem such as memory corruption and so on.
 	 * NOTE: When not using Wi-Fi nor Bluetooth you can pin the guiTask to core 0 */
+
+	initGui();
+
     xTaskCreatePinnedToCore(guiCommonTask, "guicommon", 4096*2, NULL, 0, &guiCommonTaskh, 1);
 	xTaskCreatePinnedToCore(guiTask, "guiTask", 4096 , NULL, 0, &guiTaskh, 1);
 	xTaskCreate(sensirionTask, "sensirionTask", 2048, NULL, 0, &SensirionTaskh);
 	connect(&connectTaskh);
 
-	xTaskCreate(clockTask, "clock", 2*1024, NULL, 0, NULL);
+//	xTaskCreate(clockTask, "clock", 2*1024, NULL, 0, NULL);
 
 	while ( ! displayReady )
 		vTaskDelay (10/portTICK_PERIOD_MS);
@@ -156,11 +162,11 @@ void app_main() {
 	while(1) {
 
 		vTaskDelay( 1000 / portTICK_PERIOD_MS);
-		stackWm[0] = uxTaskGetStackHighWaterMark( connectTaskh );
-		stackWm[1] = uxTaskGetStackHighWaterMark( guiCommonTaskh );
-		stackWm[2] = uxTaskGetStackHighWaterMark( guiTaskh );
-		stackWm[3] = uxTaskGetStackHighWaterMark( SensirionTaskh );
-//		printf ( "freeHeapSize %d\n",  xPortGetFreeHeapSize());
+//		stackWm[0] = uxTaskGetStackHighWaterMark( connectTaskh );
+//		stackWm[1] = uxTaskGetStackHighWaterMark( guiCommonTaskh );
+//		stackWm[2] = uxTaskGetStackHighWaterMark( guiTaskh );
+//		stackWm[3] = uxTaskGetStackHighWaterMark( SensirionTaskh );
+////		printf ( "freeHeapSize %d\n",  xPortGetFreeHeapSize());
 //		printf ( "freeHeapSize MALLOC_CAP_DMA:\n");
 //		heap_caps_print_heap_info(MALLOC_CAP_DMA);
 

@@ -59,7 +59,7 @@ NavigArrows::NavigArrows(lv_obj_t* parent, bool right, bool left, lv_style_t* st
 
 	if (right) {
 		buttonRight = lv_btn_create(_parent);
-		lv_obj_set_size(buttonRight, 100, 70);
+		lv_obj_set_size(buttonRight, 120, 75);
 		lv_obj_align(buttonRight, LV_ALIGN_BOTTOM_RIGHT, 10, 10);
 		if ( style != NULL)
 			lv_obj_add_style(buttonRight,style, 0);
@@ -76,7 +76,7 @@ NavigArrows::NavigArrows(lv_obj_t* parent, bool right, bool left, lv_style_t* st
 
 	if (left) {
 		buttonLeft = lv_btn_create(_parent);
-		lv_obj_set_size(buttonLeft, 100, 70);
+		lv_obj_set_size(buttonLeft, 120, 75);
 		lv_obj_align(buttonLeft, LV_ALIGN_BOTTOM_LEFT,-10,10);
 		if ( style != NULL)
 			lv_obj_add_style(buttonLeft,style, 0);

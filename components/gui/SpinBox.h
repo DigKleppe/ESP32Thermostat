@@ -37,8 +37,8 @@ typedef struct
 	lv_obj_t *label;
 }SpinBoxDescr_t;
 
-static const int spinBoxButtonHeigth	= 70;
-static const int spinBoxButtonWidth		= 80;
+static const int spinBoxButtonHeigth	= 80;
+static const int spinBoxButtonWidth		= 100;
 static const int MAXCHARS				= 4;
 static const int NAMELABELHEIGHT		= 20;
 static const int PADDING				= 6;
@@ -52,6 +52,7 @@ public:
 	virtual ~SpinBox();
 	SpinBoxDescr_t myDesc;
 	lv_obj_t* label;
+	void upDate (void);
 
 private:
  	lv_obj_t* buttonP;

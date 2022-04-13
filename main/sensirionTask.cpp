@@ -19,7 +19,7 @@
 
 //const char units[4][7] { "^ppm", "^" "\xB0" "C", "^%", "" };
 
-static const char * units[] = { "\xC2\xB0" "C", "%" ,"ppm"};
+//static const char * units[] = { "\xC2\xB0" "C", "%" ,"ppm"};
 
 extern int scriptState;
 extern SemaphoreHandle_t I2CSemaphore;  // used by lvgl, shares the same bus
@@ -138,7 +138,6 @@ void sensirionTask(void *pvParameter) {
 
 				for (int n = 0; n < 3; n++) {
 					displayMssg.line = n;
-					sprintf( str2," %s", units[n]);
 					switch (n){
 					case 0:
 						sprintf(str, "%2.1f",lastVal.temperature);
@@ -169,9 +168,9 @@ void sensirionTask(void *pvParameter) {
 					logTxIdx = 0;
 
 				sprintf( str,"IP:%s %d",ipstr, cntr++);
-				displayMssg.displayItem = DISPLAY_ITEM_STATUSLINE;
-				if ( xQueueSend( displayMssgBox, &displayMssg, 0 ) == pdPASS)
-					xQueueReceive(displayReadyMssgBox, &dummy, 500); // if accepted wait until data is displayed
+//				displayMssg.displayItem = DISPLAY_ITEM_STATUSLINE;
+//				if ( xQueueSend( displayMssgBox, &displayMssg, 0 ) == pdPASS)
+//					xQueueReceive(displayReadyMssgBox, &dummy, 500); // if accepted wait until data is displayed
 				if ( LOGINTERVAL > 5)
 					vTaskDelay((LOGINTERVAL - 5) *1000 / portTICK_PERIOD_MS);
 

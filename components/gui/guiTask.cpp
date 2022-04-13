@@ -129,8 +129,7 @@ void guiTask(void *pvParameter) {
 					break;
 
 				case DISPLAY_ITEM_MEASLINE:
-					measScreen->setValueAndName(recDdisplayMssg.line,(const char*) recDdisplayMssg.str1,
-							(const char*) recDdisplayMssg.str2);
+					measScreen->setDisplayText(recDdisplayMssg.line,(char *) recDdisplayMssg.str1);
 					break;
 				case DISPLAY_ITEM_STOP:
 				case DISPLAY_ITEM_COLOR:

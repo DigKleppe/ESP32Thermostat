@@ -3,6 +3,8 @@
  *
  *  Created on: Mar 30, 2022
  *      Author: dig
+ *
+ *      0xf769, 0xf76b temperature hi low
  */
 
 #ifndef GUI_FONTS_H_
@@ -24,6 +26,8 @@ extern const  lv_font_t awsome44;
 extern const  lv_font_t Awsome50;
 extern const  lv_font_t awsome60;
 extern const  lv_font_t awsome75;
+
+extern const  lv_font_t AwsomeSymbols40;
 
 extern const lv_font_t insolata75;
 extern const lv_font_t dejavusans44;

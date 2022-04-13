@@ -42,7 +42,7 @@
 //const char units[4][7] { "\xC2" "\xB0" "C", "%RH",  "ppm","" };
 static const char * units[] = { "\xC2\xB0" "C", "%" ,"ppm"};
 static const char * formats[] = { "%2.1f","%2.1f", "%d"};
-static const char * name[] = { "temperatuur:","luchtvochtigheid:", "CO2:"};
+static const char * name[] = { "Temperatuur:","Luchtvochtigheid:", "CO2:"};
 
 MeasScreen::MeasScreen( ) {
 
