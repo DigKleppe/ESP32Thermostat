@@ -40,8 +40,8 @@ public:
 	void show();
 	void setValues( mainScreenVars_t * );
 	void getValues( mainScreenVars_t * );
-	void setTemperatureDisplayValue( float value);
-	void setTemperatureDisplayText ( char * text);
+//	void setTemperatureDisplayValue( float value);
+//	void setTemperatureDisplayText ( char * text);
 	static const int MAXVALUECHARS = 8;
 
 private:

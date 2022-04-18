@@ -23,60 +23,42 @@
 #include "settings.h"
 
 
-userSettings_t 	userSettings;
 
 
-
-SettingsScreen::SettingsScreen() {
+SettingsScreen::SettingsScreen( const SpinBoxDescr_t  * descr) {
 
 	settingsScreen = lv_obj_create(NULL);
 	backGround =  makeBackGround(settingsScreen);
 
-	SpinBoxDescr_t spinBoxDescr[4] = {
-		{{.name = "  temperatuur offset:" },
-		{.format = "%2.1f"},
-		.maxVal = +5.0,
-		.minVal = -54.0,
-		.step = 0.1,
-		.var = &userSettings.temperatureOffset,
-		},
-		{{.name = "  temperatuur offset:" },
-			{.format = "%2.1f"},
-			.maxVal = +5.0,
-			.minVal = -54.0,
-			.step = 0.1,
-			.var = &userSettings.temperatureOffset,
-		},
-		{{.name = "  temperatuur offset:" },
-			{.format = "%2.1f"},
-			.maxVal = +5.0,
-			.minVal = -54.0,
-			.step = 0.1,
-			.var = &userSettings.temperatureOffset,
-		},
-		{{.name = "  temperatuur offset:" },
-			{.format = "%2.1f"},
-			.maxVal = +5.0,
-			.minVal = -54.0,
-			.step = 0.1,
-			.var = &userSettings.temperatureOffset,
+	int n = -1;
+	memset (spinBox,0 , sizeof (spinBox));
+	do {
+		n++;
+		if ( descr -> name != NULL)
+			spinBox[n] = new SpinBox ( backGround, n, descr);
+		descr++;
+	}  while((n < (NR_SPINBOXES-1)) && (descr->name != NULL));
 
-		}
-	};
 
-	for ( int n = 0; n < NR_SPINBOXES; n++){
-		spinBox[n] = new SpinBox( backGround);
-		spinBox[n]->init(&spinBoxDescr[n],  n*SPINBOXHEIGHT);
 #ifndef LGL_SIMULATOR
 		vTaskDelay(50/portTICK_PERIOD_MS);
 #endif
+	upDate();
 
-	}
 	navigArrows = new NavigArrows(backGround, true, true);
 
 }
 
-
+void SettingsScreen::upDate (void) {
+	int n = 0;
+	do {
+		if (spinBox[n] != NULL)
+			spinBox[n]->upDate();
+		else
+			n = NR_SPINBOXES;
+		n++;
+	}  while(n < NR_SPINBOXES);
+}
 
 
 void SettingsScreen::show() {

@@ -12,22 +12,16 @@
 #include "guiTask.h"
 #include "guiCommonTask.h"
 #include "connect.h"
+#include "udpClient.h"
 
 #include "SparkFun_SCD30_Arduino_Library.h"
-#define LV_SYMBOL_OHM    "\xef\xCE\xA9"  //0x3A9
-#define LV_SYMBOL_MICRO  "\xef\xCE\xBC" //0x3BC
 
-//const char units[4][7] { "^ppm", "^" "\xB0" "C", "^%", "" };
-
-//static const char * units[] = { "\xC2\xB0" "C", "%" ,"ppm"};
+#define UDPTXPORT	5001
 
 extern int scriptState;
 extern SemaphoreHandle_t I2CSemaphore;  // used by lvgl, shares the same bus
 
-//{type_A, "^" LV_SYMBOL_MICRO "A", "10" LV_SYMBOL_MICRO "A", 5,4, SW_10uA, 0 ,0, 1.0 , 1.0  },
-
 #define LOGINTERVAL			 	60  // seconds
-
 #define MAXLOGVALUES			(24*60)
 
 typedef struct {
@@ -89,14 +83,11 @@ void testLog(void) {
 
 }
 
-
-
 void sensirionTask(void *pvParameter) {
 
 	SCD30 airSensor;
 	char str[25];
 	char str2[25];
-	int cntr=1;
 	uint32_t dummy;
 	displayMssg_t displayMssg;
 	displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
@@ -162,12 +153,15 @@ void sensirionTask(void *pvParameter) {
 				Serial.print(lastVal.hum, 1);
 				Serial.println();
 
+				sprintf( str, "1:%d",lastVal.co2);
+				UDPsendMssg(UDPTXPORT, str , strlen(str));
+
 				tLog[logTxIdx] = lastVal;
 				logTxIdx++;
 				if (logTxIdx >= MAXLOGVALUES)
 					logTxIdx = 0;
 
-				sprintf( str,"IP:%s %d",ipstr, cntr++);
+//				sprintf( str,"IP:%s %d",ipstr, cntr++);
 //				displayMssg.displayItem = DISPLAY_ITEM_STATUSLINE;
 //				if ( xQueueSend( displayMssgBox, &displayMssg, 0 ) == pdPASS)
 //					xQueueReceive(displayReadyMssgBox, &dummy, 500); // if accepted wait until data is displayed

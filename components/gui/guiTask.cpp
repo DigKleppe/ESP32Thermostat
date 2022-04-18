@@ -22,8 +22,9 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
-
 #include "styles.h"
+
+#include "settings.h"
 
 //extern MenuSetttingsDesrc_t DMMSettingsDescrTable[];
 extern "C" void disp_wait_for_pending_transactions(void);
@@ -33,13 +34,77 @@ userState_t userState = USER_STATE_RUN;
 QueueHandle_t displayMssgBox;
 QueueHandle_t displayReadyMssgBox;
 
-SettingsScreen *settingsScreen;
+SettingsScreen *settingsScreen1;
+SettingsScreen *settingsScreen2;
 MainScreen *mainScreen;
 MeasScreen *measScreen;
 
 int screenIdx;
 
-#define NRSCREENS 3
+#define NRSCREENS 4
+
+
+const SpinBoxDescr_t settingsScreenDescr1[] = {
+	{
+	.name = "temperatuur offset:" ,
+	.format = "%2.1f",
+	.maxVal = +5.0,
+	.minVal = -5.0,
+	.step = 0.1,
+	.var = &userSettings.temperatureOffset,
+	},
+	{.name = "P-factor:" ,
+		.format = "%1.2f",
+		.maxVal = 100,
+		.minVal = 0,
+		.step = 0.1,
+		.var = &userSettings.PIDp,
+	},
+	{.name = "I-factor:" ,
+		.format = "%2.1f",
+		.maxVal = 100,
+		.minVal = 0,
+		.step = 0.1,
+		.var = &userSettings.PIDi,
+	},
+	{.name = "Max I:" ,
+		.format = "%2.1f",
+		.maxVal = 100,
+		.minVal = 0,
+		.step = 0.1,
+		.var = &userSettings.PIDmaxi,
+	},
+	{.name = NULL ,
+		.format = NULL,
+		.maxVal = 100,
+		.minVal = 0,
+		.step = 0.1,
+		.var = NULL,
+	}
+};
+
+
+const SpinBoxDescr_t settingsScreenDescr2[] = {
+	{
+	.name = "Control interval:" ,
+	.format = "%2.0f",
+	.maxVal = 100,
+	.minVal = 1,
+	.step = 1,
+	.var = &userSettings.controlInterval,
+	},
+	{
+	.name = NULL,
+	.format = "%2.1f",
+	.maxVal = 100,
+	.minVal = 0,
+	.step = 0.1,
+	.var = NULL,
+	}
+};
+
+
+
 
 void showScreen(int idx) {
 	switch (idx) {
@@ -50,7 +115,10 @@ void showScreen(int idx) {
 		mainScreen->show();
 		break;
 	case 2:
-		settingsScreen->show();
+		settingsScreen1->show();
+		break;
+	case 3:
+		settingsScreen2->show();
 		break;
 
 	default:
@@ -62,12 +130,16 @@ void showScreen(int idx) {
 void nextScreenClick(lv_event_t *e) {  // from navigArrows
 	if (screenIdx < (NRSCREENS - 1))
 		screenIdx++;
+	else
+		screenIdx = 0;
 	showScreen(screenIdx);
 }
 
 void prevScreenClick(lv_event_t *e) {  // from navigArrows
 	if (screenIdx > 0)
 		screenIdx--;
+	else
+		screenIdx = NRSCREENS-1;
 	showScreen(screenIdx);
 }
 
@@ -84,14 +156,12 @@ void guiTask(void *pvParameter) {
 	while (!displayReady)
 		vTaskDelay(100 / portTICK_RATE_MS);
 
-
-
-	settingsScreen = new SettingsScreen();
+	settingsScreen1 = new SettingsScreen(&settingsScreenDescr1[0]);
+	settingsScreen2 = new SettingsScreen(settingsScreenDescr2);
 	mainScreen = new MainScreen();
 	measScreen = new MeasScreen();
 
 	showScreen(0);
-
 
 //	vTaskDelay( 100/portTICK_PERIOD_MS);
 //	settingsScreen.show();
@@ -130,8 +200,8 @@ void guiTask(void *pvParameter) {
 
 				case DISPLAY_ITEM_MEASLINE:
 					measScreen->setDisplayText(recDdisplayMssg.line,(char *) recDdisplayMssg.str1);
-					if ( recDdisplayMssg.line == 0)
-						mainScreen->setTemperatureDisplayText( (char *) recDdisplayMssg.str1 );
+//					if ( recDdisplayMssg.line == 0)
+//						mainScreen->setTemperatureDisplayText( (char *) recDdisplayMssg.str1 );
 					break;
 				case DISPLAY_ITEM_STOP:
 				case DISPLAY_ITEM_COLOR:

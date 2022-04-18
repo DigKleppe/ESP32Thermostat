@@ -25,6 +25,17 @@ static mainScreenVars_t vars;
 const char * cbText[NR_CHECKBOXES] = {"Verwarming", "Koeling" };
 const bool * cbVar[NR_CHECKBOXES] = {  &vars.heatingOn ,&vars.coolingOn };
 
+
+SpinBoxDescr_t spinBoxDescrTemperatuur = {
+	.name = "Gewenste temperatuur:" ,
+	.format = "%2.1f",
+	.maxVal = 25.0,
+	.minVal = 10.0,
+	.step = 0.1,
+	.var = &vars.tempSetPoint,
+};
+
+
 //void MainScreen::event_handler(lv_event_t * e)
 //static void event_handler(lv_event_t * e)
 void MainScreen::event_handler(lv_event_t * e)
@@ -40,32 +51,25 @@ void MainScreen::event_handler(lv_event_t * e)
     }
 }
 
-void MainScreen::setTemperatureDisplayValue( float value) {
-	measDisplay->setValue ( value );
-}
-
-void MainScreen::setTemperatureDisplayText( char *text) {
-	measDisplay->setText (text);
-}
+//void MainScreen::setTemperatureDisplayValue( float value) {
+//	measDisplay->setValue ( value );
+//}
+//
+//void MainScreen::setTemperatureDisplayText( char *text) {
+//	measDisplay->setText (text);
+//}
 
 MainScreen::MainScreen() {
 	screen = lv_obj_create(NULL);
-	SpinBoxDescr_t spinBoxDescrTemperatuur = {
-		{.name = "Gewenste temperatuur:" },
-		{.format = "%2.1f"},
-		.maxVal = 25.0,
-		.minVal = 10.0,
-		.step = 0.1,
-		.var = &vars.tempSetPoint,
-	};
+
 
 	backGround =  makeBackGround(screen);
 	clockDisplay = new ClockDisplay(backGround);
 	statusIndicator = new StatusIndicator ( backGround);
-	measDisplay = new MeasDisplay(backGround, 40,"Temperatuur", "\xC2\xB0" "C", "%2.1f");
+//	measDisplay = new MeasDisplay(backGround, 40,"Temperatuur", "\xC2\xB0" "C", "%2.1f");
 
-	spinBoxTemperatuur = new SpinBox(backGround );
-	spinBoxTemperatuur-> init(&spinBoxDescrTemperatuur, 150);
+	spinBoxTemperatuur = new SpinBox(backGround, 1, &spinBoxDescrTemperatuur );
+
 
 	for (int n = 0; n < NR_CHECKBOXES; n++) {
 		cb[n] = lv_checkbox_create(screen);
@@ -80,7 +84,7 @@ MainScreen::MainScreen() {
 
 void MainScreen::setValues(mainScreenVars_t *p){
 	vars = *p;
-	measDisplay->setValue(p->temperature);
+//	measDisplay->setValue(p->temperature);
 	spinBoxTemperatuur->upDate();
 	if ( vars.heatingOn)
 		lv_obj_add_state(cb[CBHEATING], LV_STATE_CHECKED);
@@ -91,9 +95,6 @@ void MainScreen::setValues(mainScreenVars_t *p){
 		lv_obj_add_state(cb[CBCOOLING], LV_STATE_CHECKED);
 	else
 		lv_obj_clear_state(cb[CBCOOLING], LV_STATE_CHECKED);
-
-
-
 }
 
 void MainScreen::getValues(mainScreenVars_t *p){

@@ -25,7 +25,7 @@ extern lv_style_t styleSpinButtonName;
 extern lv_style_t styleSpinButton;
 extern lv_style_t styleClock;
 extern lv_style_t styleInfo;
-
+extern lv_style_t styleSymbol;
 
 //  lv_palette_main(LV_PALETTE_GREY)
 #define DEFAULTVALUECOLOR			lv_color_make(255, 255, 255)
@@ -59,9 +59,15 @@ extern lv_style_t styleInfo;
 #define CLOCKBGCOLOR				DEFAULTBACKGROUNDCOLOR
 
 
-#define INFOFONT					AwsomeSymbols40
+#define INFOFONT					SPINBUTTONNAMEFONT
 #define INFOCOLOR					DEFAULTVALUECOLOR
 #define INFOBGCOLOR					DEFAULTBACKGROUNDCOLOR
+
+
+#define SYMBOLFONT					AwsomeSymbols40
+#define SYMBOLCOLOR					DEFAULTVALUECOLOR
+#define SYMBOLBGCOLOR				DEFAULTBACKGROUNDCOLOR
+
 
 
 void initStyles (void);

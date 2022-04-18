@@ -27,17 +27,17 @@
 #endif
 
 typedef struct
-{ 	char name[25];
-	char format[8];
+{ 	const char * name;
+	const char  *format;
 	float maxVal;
 	float minVal;
 	float step;
 	float *var;
-
 	lv_obj_t *label;
 }SpinBoxDescr_t;
 
-static const int spinBoxButtonHeigth	= 80;
+
+static const int spinBoxButtonHeigth	= 75;
 static const int spinBoxButtonWidth		= 100;
 static const int MAXCHARS				= 4;
 static const int NAMELABELHEIGHT		= 20;
@@ -47,17 +47,15 @@ const int SPINBOXHEIGHT 				= (spinBoxButtonHeigth + NAMELABELHEIGHT + PADDING);
 
 class SpinBox  { //public Stream{
 public:
-	SpinBox(lv_obj_t * parent);
-	void init (SpinBoxDescr_t * desc, int y );
+	SpinBox(lv_obj_t * parent, int line,const SpinBoxDescr_t *desc );
+//	void init (SpinBoxDescr_t * desc, int y );
+	void upDate (void);
 	virtual ~SpinBox();
 	SpinBoxDescr_t myDesc;
-	lv_obj_t* label;
-	void upDate (void);
-
 private:
- 	lv_obj_t* buttonP;
+	lv_obj_t* label;
+	lv_obj_t* buttonP;
 	lv_obj_t* buttonM;
-	int yPos;
 	lv_obj_t *_parent;
 
 };

@@ -18,10 +18,21 @@ extern settingsDescr_t settingsDescr[];
 //extern char * myIpAddr;
 extern int myRssi;
 
-userSettings_t userSettingsDefaults = {
-		1,
-		0.0,
-		{CHECKSTR}
+
+char checkstr[MAX_STRLEN+1];
+
+const userSettings_t userSettingsDefaults = {
+	{.SSID= "Klepnet"},
+	{.pwd = "Yellowstone1999"},
+	.temperatureSetpoint = 19.0,
+	.temperatureOffset = 3.0,
+	.PIDp = 10.0,
+	.PIDi = 1.0,
+	.PIDmaxi = 100,
+	.controlInterval = 15,
+	.heatingOn = true,
+	.coolingOn = true,
+	{.checkstr = CHECKSTR}
 };
 
 userSettings_t userSettings;

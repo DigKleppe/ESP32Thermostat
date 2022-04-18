@@ -16,8 +16,9 @@ const int NR_SPINBOXES =  4;
 
 class SettingsScreen {
 public:
-	SettingsScreen();
+	SettingsScreen( const SpinBoxDescr_t * descr);
 	virtual ~SettingsScreen();
+	void upDate( void);
 	void show();
 private:
 	lv_obj_t * backGround;

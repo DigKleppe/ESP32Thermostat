@@ -17,10 +17,19 @@ typedef enum { FLT, STR, INT , DESCR , CALVAL} varType_t;
 #define MAX_STRLEN 32
 #define CHECKSTR 	 "test1"
 #define CALCHECKSTR  "test2"
+
 typedef struct {
-	int weetnie;
+	char SSID[MAX_STRLEN+1];
+	char pwd[MAX_STRLEN+1];
+	float temperatureSetpoint;
 	float temperatureOffset;
-	char checkstr[20];
+	float PIDp;
+	float PIDi;
+	float PIDmaxi;
+	float controlInterval;
+	bool heatingOn;
+	bool coolingOn;
+	char checkstr[MAX_STRLEN+1];
 }userSettings_t;
 
 typedef struct {

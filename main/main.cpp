@@ -151,8 +151,7 @@ void app_main() {
 	xTaskCreatePinnedToCore(guiTask, "guiTask", 4096 , NULL, 0, &guiTaskh, 1);
 	xTaskCreate(sensirionTask, "sensirionTask", 2048, NULL, 0, &SensirionTaskh);
 	connect(&connectTaskh);
-
-//	xTaskCreate(clockTask, "clock", 2*1024, NULL, 0, NULL);
+	xTaskCreate(clockTask, "clock", 2*1024, NULL, 0, NULL);
 
 	while ( ! displayReady )
 		vTaskDelay (10/portTICK_PERIOD_MS);
