@@ -23,6 +23,8 @@
 #include "MeasDisplay.h"
 #include "StatusIndicator.h"
 
+#include "PID.h"
+
 #define LV_SYMBOL_OHM    "\xef\xCE\xA9"  //0x3A9
 #define LV_SYMBOL_MICRO  "\xef\xCE\xBC" //0x3BC
 
@@ -38,6 +40,7 @@ public:
 	void setDisplayValue(int line , float value);
 	void setDisplayValue(int line , int value);
 	void setValueAndName(int line, const char *value, const char *name);
+	void setStatsuIndicator (thermostatStatus_t);
 //	void setStatusLine (const char * text);
 
 	lv_obj_t * screen;

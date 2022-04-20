@@ -27,7 +27,7 @@ extern int myRssi;
 
 const tCGI *g_pCGIs;
 int g_iNumCGIs;
-bool settingsChanged;
+
 
 #define NUM_CGIurls 5
 

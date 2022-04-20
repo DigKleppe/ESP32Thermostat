@@ -23,7 +23,7 @@ var MAXPOINTS = LOGDAYS * 24 * 60 / MINUTESPERTICK;
 
 var SIMULATE = false;
 
-var displayNames = ["", "temperatuur", "vochtigheid", "CO2", "ref"];
+var displayNames = ["", "temperatuur", "vochtigheid", "CO2", "PID"];
 var dayNames = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
 
 var CO2Options = {
@@ -60,11 +60,13 @@ var tempAndRHoptions = {
 
 	vAxes: {
 		0: { logScale: false },
-		1: { logScale: false }
+		1: { logScale: false },
+		2: { logScale: false },
 	},
 	series: {
 		0: { targetAxisIndex: 0 },// temperature
 		1: { targetAxisIndex: 1 },// RH
+		2: { targetAxisIndex: 1 },// PID
 	},
 };
 
@@ -117,6 +119,8 @@ function initChart() {
 	tempAndRHdata.addColumn('string', 'Time');
 	tempAndRHdata.addColumn('number', 't');
 	tempAndRHdata.addColumn('number', 'RH');
+	tempAndRHdata.addColumn('number', 'PID');
+	
 
 	chartRdy = true;
 	dontDraw = false;
@@ -170,8 +174,8 @@ function simplot() {
 		if ((n & 16) > 12)
 			w += 20;
 
-		//                                         delta  W            W                        RAW                    vBAT                       VSOL                       temperature                                                                     
-		str2 = str2 + simMssgCnts++ + "," + simValue2 + "," + w + "," + (100 * (simValue2 + 3)) + "," + (simValue2 + 20) + "," + (simValue2 * 5) + "," + + (simValue2 * 4) + "," + "\n";
+		//                                    temperatuur       hum                        		co2                    PID                                                                                         
+		str2 = str2 + simMssgCnts++ + "," + simValue2 + "," + (100 * (simValue2 + 3)) + "," + (simValue2 + 20) + "," + (simValue2 * 5) + ","  + "\n";
 	}
 	plotArray(str2);
 }
@@ -222,6 +226,7 @@ function plotArray(str) {
 				dayIdx = 0;
 			plotTempAndRH(1, arr[1]); // temperature
 			plotTempAndRH(2, arr[2]); // RH
+			plotTempAndRH(3, arr[4]); // PID
 			plotCO2(1, arr[3]); // CO2
 		}
 	}

@@ -42,6 +42,7 @@ typedef struct {
 
 
 extern settingsDescr_t settingsDescr[];
+extern bool settingsChanged;
 
 esp_err_t saveUserSettings( void);
 esp_err_t loadUserSettings( void);

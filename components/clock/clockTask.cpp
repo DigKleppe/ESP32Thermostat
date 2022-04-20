@@ -62,7 +62,7 @@ void clockTask(void *pvParameter) {
     	 localtime_r(&now, &timeinfo);
     	 if (lastsec != timeinfo.tm_sec ) {
     		 lastsec = timeinfo.tm_sec;
-    		 strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+    	//	 strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
     	//	 ESP_LOGI(TAG, "The current date/time is: %s", strftime_buf);
     		 sprintf(strftime_buf,"%2d:%02d:%02d" , timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
     		 for ( int n=0 ; n < clockDisplays;n++){

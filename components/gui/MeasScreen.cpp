@@ -16,6 +16,7 @@
 #include "backGround.h"
 
 
+
 #ifdef LGL_SIMULATOR
 #include "lv_drv_conf.h"
 #define LV_HOR_RES_MAX 	SDL_HOR_RES
@@ -51,6 +52,8 @@ MeasScreen::MeasScreen( ) {
 
 void MeasScreen::setDisplayText(int line, char *text) {
 	measDisplay[line]->setText ( text);
+	if ( line == 1)
+		setStatsuIndicator(thermostatStatus);
 //	if (strlen ( text) > MAXVALUECHARS)
 //		text[MAXVALUECHARS+1] = 0; // terminate
 //	lv_label_set_text(valueLabel[line], text);
@@ -58,10 +61,22 @@ void MeasScreen::setDisplayText(int line, char *text) {
 
 void MeasScreen::setDisplayValue(int line , float value) {
 	measDisplay[line]->setValue ( value );
-//
-//	char str[20];
-//	sprintf( str, "%f", value );
-//	setDisplayText(line, str);
+
+}
+
+
+void MeasScreen::setStatsuIndicator (thermostatStatus_t status) {
+	switch (status) {
+	case THERMOSTATOFF:
+		statusIndicator->setSymbol(NULL);
+		break;
+	case HEATING_ON:
+		statusIndicator->setSymbol(HEATERON_SIMBOL);
+		break;
+	case COOLING_ON:
+		statusIndicator->setSymbol(COOLINGON_SYMBOL);
+		break;
+	}
 }
 
 void MeasScreen::setDisplayValue(int line , int value) {

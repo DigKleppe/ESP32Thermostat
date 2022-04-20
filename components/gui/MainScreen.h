@@ -24,12 +24,12 @@
 #include "StatusIndicator.h"
 #include "MeasDisplay.h"
 
-typedef struct {
-	float temperature;
-	float tempSetPoint;
-	bool heatingOn;
-	bool coolingOn;
-} mainScreenVars_t;
+//typedef struct {
+//	float temperature;
+//	float tempSetPoint;
+//	bool heatingOn;
+//	bool coolingOn;
+//} mainScreenVars_t;
 
 typedef enum { CBHEATING, CBCOOLING,NR_CHECKBOXES } checBox_t;
 
@@ -38,11 +38,12 @@ public:
 	MainScreen();
 	virtual ~MainScreen();
 	void show();
-	void setValues( mainScreenVars_t * );
-	void getValues( mainScreenVars_t * );
+//	void setValues( mainScreenVars_t * );
+//	void getValues( mainScreenVars_t * );
 //	void setTemperatureDisplayValue( float value);
 //	void setTemperatureDisplayText ( char * text);
 	static const int MAXVALUECHARS = 8;
+	void update (void);
 
 private:
 	char  measValue1[MAXVALUECHARS+3]; // extra space for a symbol (3 characters)
@@ -57,7 +58,6 @@ private:
 	NavigArrows * navigArrows;
 	ClockDisplay * clockDisplay;
 	StatusIndicator* statusIndicator;
-
 
 	static void event_handler(lv_event_t * e);
 };

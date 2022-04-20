@@ -11,8 +11,12 @@
 
 #include "guiTask.h"
 #include "guiCommonTask.h"
+#include "sensirionTask.h"
 #include "connect.h"
 #include "udpClient.h"
+#include "PID.h"
+#include "settings.h"
+
 
 #include "SparkFun_SCD30_Arduino_Library.h"
 
@@ -21,7 +25,7 @@
 extern int scriptState;
 extern SemaphoreHandle_t I2CSemaphore;  // used by lvgl, shares the same bus
 
-#define LOGINTERVAL			 	60  // seconds
+
 #define MAXLOGVALUES			(24*60)
 
 typedef struct {
@@ -29,7 +33,7 @@ typedef struct {
 	float temperature;
 	float hum;
 	int32_t co2;
-	float refTemperature;
+	float PIDsetting;
 } log_t;
 
 static log_t tLog[ MAXLOGVALUES];
@@ -39,8 +43,6 @@ static int timeStamp =0;
 static int logTxIdx;
 static int logRxIdx;
 
-
-
 void testLog(void) {
 //	logTxIdx = 0;
 	for (int p = 0; p < 20; p++) {
@@ -48,7 +50,7 @@ void testLog(void) {
 		tLog[logTxIdx].temperature = 10 + (float) p/10.0;
 		tLog[logTxIdx].hum = 20 + (float) p/3.0;
 		tLog[logTxIdx].co2 = 200 + p;
-		tLog[logTxIdx].refTemperature = 123.4;
+		tLog[logTxIdx].PIDsetting = 12.3;
 		logTxIdx++;
 		if (logTxIdx >= MAXLOGVALUES )
 			logTxIdx = 0;
@@ -80,7 +82,10 @@ void testLog(void) {
 //	} while (len);
 //
 //	printf("\r\n *************\r\n");
+}
 
+float getTemperature (void) {
+	return lastVal.temperature;
 }
 
 void sensirionTask(void *pvParameter) {
@@ -108,10 +113,8 @@ void sensirionTask(void *pvParameter) {
 		xQueueSend( displayMssgBox, &displayMssg, 0 );
 		xQueueReceive(displayReadyMssgBox, &dummy, 500/portTICK_PERIOD_MS); // if accepted wait until data is displayed
 	}
-
-
 	displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
-	airSensor.setMeasurementInterval(LOGINTERVAL);
+	airSensor.setMeasurementInterval(MEASINTERVAL);
 	airSensor.setAutoSelfCalibration(true);
 	airSensor.setTemperatureOffset(2.0);
 	xSemaphoreGive(I2CSemaphore);
@@ -121,7 +124,7 @@ void sensirionTask(void *pvParameter) {
 		if (pdTRUE == xSemaphoreTake(I2CSemaphore, portMAX_DELAY)) {
 			if (airSensor.dataAvailable()) {
 				lastVal.co2  = airSensor.getCO2();
-				lastVal.temperature  = airSensor.getTemperature();
+				lastVal.temperature  = airSensor.getTemperature() - userSettings.temperatureOffset;
 				lastVal.hum  = airSensor.getHumidity();
 				lastVal.timeStamp = timeStamp++;
 				xSemaphoreGive(I2CSemaphore);
@@ -155,18 +158,15 @@ void sensirionTask(void *pvParameter) {
 
 				sprintf( str, "1:%d",lastVal.co2);
 				UDPsendMssg(UDPTXPORT, str , strlen(str));
-
+				updatePID(lastVal.temperature);
+				lastVal.PIDsetting = PIDsetting;
 				tLog[logTxIdx] = lastVal;
 				logTxIdx++;
 				if (logTxIdx >= MAXLOGVALUES)
 					logTxIdx = 0;
 
-//				sprintf( str,"IP:%s %d",ipstr, cntr++);
-//				displayMssg.displayItem = DISPLAY_ITEM_STATUSLINE;
-//				if ( xQueueSend( displayMssgBox, &displayMssg, 0 ) == pdPASS)
-//					xQueueReceive(displayReadyMssgBox, &dummy, 500); // if accepted wait until data is displayed
-				if ( LOGINTERVAL > 5)
-					vTaskDelay((LOGINTERVAL - 5) *1000 / portTICK_PERIOD_MS);
+				if ( MEASINTERVAL > 5)
+					vTaskDelay((MEASINTERVAL - 5) *1000 / portTICK_PERIOD_MS);
 
 			} else {
 				xSemaphoreGive(I2CSemaphore);
@@ -188,7 +188,7 @@ case 0:
 	len += sprintf(pBuffer + len, "%3.2f,", lastVal.temperature);
 	len += sprintf(pBuffer + len, "%3.2f,", lastVal.hum);
 	len += sprintf(pBuffer + len, "%d,", lastVal.co2);
-	len += sprintf(pBuffer + len, "%3.3f\n", lastVal.refTemperature);
+	len += sprintf(pBuffer + len, "%3.1f\n",lastVal.PIDsetting);
 	return len;
 	break;
 default:
@@ -209,7 +209,7 @@ if (logRxIdx != (logTxIdx)) {  // something to send?
 		len += sprintf(pBuffer + len, "%3.2f,", tLog[logRxIdx].temperature);
 		len += sprintf(pBuffer + len, "%3.2f,", tLog[logRxIdx].hum);
 		len += sprintf(pBuffer + len, "%d,", tLog[logRxIdx].co2);
-		len += sprintf(pBuffer + len, "%3.3f\n", tLog[logRxIdx].refTemperature);
+		len += sprintf(pBuffer + len, "%3.3f\n", tLog[logRxIdx].PIDsetting);
 		logRxIdx++;
 		if (logRxIdx > MAXLOGVALUES)
 			logRxIdx = 0;
@@ -253,7 +253,7 @@ int getLogScript(char *pBuffer, int count) {
 				len += sprintf(pBuffer + len, "%3.2f,", tLog[logRxIdx].temperature);
 				len += sprintf(pBuffer + len, "%3.2f,", tLog[logRxIdx].hum);
 				len += sprintf(pBuffer + len, "%d,", tLog[logRxIdx].co2);
-				len += sprintf(pBuffer + len, "%3.3f\n", tLog[logRxIdx].refTemperature);
+				len += sprintf(pBuffer + len, "%3.3f\n", tLog[logRxIdx].PIDsetting);
 				logRxIdx++;
 				if (logRxIdx >= MAXLOGVALUES)
 					logRxIdx = 0;

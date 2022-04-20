@@ -23,8 +23,6 @@
 #include "settings.h"
 
 
-
-
 SettingsScreen::SettingsScreen( const SpinBoxDescr_t  * descr) {
 
 	settingsScreen = lv_obj_create(NULL);
@@ -62,9 +60,7 @@ void SettingsScreen::upDate (void) {
 
 
 void SettingsScreen::show() {
-//	lv_scr_load(lv_scr_act());
 	lv_scr_load(settingsScreen);
-
 }
 
 SettingsScreen::~SettingsScreen() {

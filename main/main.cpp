@@ -39,12 +39,14 @@ idf.py monitor -p /dev/ttyUSB2
 #include "nvs_flash.h"
 #include "esp_netif.h"
 #include "esp_event.h"
+#include "Arduino.h"
 
 #include "connect.h"
 #include "guiTask.h"
 #include "guiCommonTask.h"
-#include "Arduino.h"
 #include "clockTask.h"
+#include "settings.h"
+#include "PID.h"
 
 
 void guiTask(void *pvParameter);
@@ -95,10 +97,11 @@ TaskHandle_t  guiTaskh;
 TaskHandle_t  SensirionTaskh;
 TaskHandle_t  connectTaskh;
 
+extern bool settingsChanged; // from settingsScreen
 uint32_t stackWm[5];
 extern "C" {
 void app_main() {
-
+	int minuteCntr = 0;
     int level = 0;
 	char str[25];
 	char str2[25];
@@ -110,25 +113,18 @@ void app_main() {
 	displayMssg.str1 = str;
 	displayMssg.str2 = str2;
 
-//    while (true) {
-//     //   gpio_set_level(GPIO_NUM_4, level);
-//        level = !level;
-//        vTaskDelay(500 / portTICK_PERIOD_MS);
-//        printf(".");
-//    }
 
-	//testLog();
-
-//	while (1) {
-//		vTaskDelay(100);
-//
-//	}
-
-
-
-    ESP_LOGI(TAG, "start");
+	ESP_LOGI(TAG, "start");
 	ESP_ERROR_CHECK(nvs_flash_init());
 	ESP_ERROR_CHECK(init_spiffs());
+
+
+	loadUserSettings();
+
+	gpio_pad_select_gpio(COOLING_PIN);
+	gpio_set_direction(COOLING_PIN, GPIO_MODE_OUTPUT);
+	gpio_pad_select_gpio(HEATING_PIN);
+	gpio_set_direction(HEATING_PIN, GPIO_MODE_OUTPUT);
 
 	I2CSemaphore = xSemaphoreCreateMutex();
 	Wire.begin(SDA_PIN, SCL_PIN, (uint32_t) I2C_CLK);
@@ -159,8 +155,19 @@ void app_main() {
 	setBacklight(40);
 
 	while(1) {
-
 		vTaskDelay( 1000 / portTICK_PERIOD_MS);
+
+		if (settingsChanged) {
+			minuteCntr = 60;
+			settingsChanged = false;
+		}
+		if (minuteCntr) {
+			minuteCntr--;
+			if (minuteCntr == 0)
+				saveUserSettings(); // save setttings after delay
+		}
+
+
 //		stackWm[0] = uxTaskGetStackHighWaterMark( connectTaskh );
 //		stackWm[1] = uxTaskGetStackHighWaterMark( guiCommonTaskh );
 //		stackWm[2] = uxTaskGetStackHighWaterMark( guiTaskh );

@@ -17,7 +17,7 @@
 extern settingsDescr_t settingsDescr[];
 //extern char * myIpAddr;
 extern int myRssi;
-
+bool settingsChanged;
 
 char checkstr[MAX_STRLEN+1];
 

@@ -95,7 +95,7 @@ const SpinBoxDescr_t settingsScreenDescr2[] = {
 	},
 	{
 	.name = NULL,
-	.format = "%2.1f",
+	.format = NULL,
 	.maxVal = 100,
 	.minVal = 0,
 	.step = 0.1,
@@ -157,7 +157,8 @@ void guiTask(void *pvParameter) {
 		vTaskDelay(100 / portTICK_RATE_MS);
 
 	settingsScreen1 = new SettingsScreen(&settingsScreenDescr1[0]);
-	settingsScreen2 = new SettingsScreen(settingsScreenDescr2);
+	settingsScreen2 = new SettingsScreen(&settingsScreenDescr2[0]);
+//	settingsScreen2 = new SettingsScreen(&settingsScreenDescr1[0]);
 	mainScreen = new MainScreen();
 	measScreen = new MeasScreen();
 
@@ -200,6 +201,7 @@ void guiTask(void *pvParameter) {
 
 				case DISPLAY_ITEM_MEASLINE:
 					measScreen->setDisplayText(recDdisplayMssg.line,(char *) recDdisplayMssg.str1);
+
 //					if ( recDdisplayMssg.line == 0)
 //						mainScreen->setTemperatureDisplayText( (char *) recDdisplayMssg.str1 );
 					break;
@@ -218,34 +220,7 @@ void guiTask(void *pvParameter) {
 
 		}
 	}
-//
-//		switch (userState) {
-//
-//		case USER_STATE_RUN:
-//			if (measScreen.active) {
-//
-//			} else {
-////				userState = USER_STATE_MENU; // enter pressed while in run state , activate menu
-////				menuSettings.show(&DMMSettingsDescrTable[0]);
-//			}
-//			break;
-//
-//		case USER_STATE_MENU:
-////			if (menuSettings.active == false) {
-////				userState = USER_STATE_RUN;
-////				measScreen.show();
-////			}
-//
-//			break;
-//		default:
-//			break;
-//
-//		}
-//
-//		vTaskDelay(10/portTICK_PERIOD_MS);
-//}
-
 }
-//}
+
 
 // /home/dig/.espressif/tools/openocd-esp32/v0.10.0-esp32-20200420/openocd-esp32/bin/openocd -f interface/ftdi/c232hm.cfg -f board/esp-wroom-32.cfg -c "program_esp /home/dig/projecten/littleVGL/dmmGui/build/dmm. 0x10000 verify"

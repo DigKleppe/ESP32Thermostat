@@ -42,7 +42,6 @@ static const int spinBoxButtonWidth		= 100;
 static const int MAXCHARS				= 4;
 static const int NAMELABELHEIGHT		= 20;
 static const int PADDING				= 6;
-
 const int SPINBOXHEIGHT 				= (spinBoxButtonHeigth + NAMELABELHEIGHT + PADDING);
 
 class SpinBox  { //public Stream{

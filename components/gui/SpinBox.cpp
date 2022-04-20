@@ -12,6 +12,7 @@
 
 #define SPACING 3
 
+extern bool settingsChanged;
 
 static void lv_spinbox_increment_event_cb(lv_event_t * e)
 {
@@ -25,6 +26,7 @@ static void lv_spinbox_increment_event_cb(lv_event_t * e)
     	char str[MAXCHARS+1];
     	sprintf( str, p->format, *p->var);
     	lv_label_set_text(p->label,str);
+    	settingsChanged = true;
     }
 }
 
@@ -41,6 +43,7 @@ static void lv_spinbox_decrement_event_cb(lv_event_t * e)
     	char str[MAXCHARS+1];
     	sprintf( str, p->format, *p->var);
     	lv_label_set_text(p->label,str);
+    	settingsChanged = true;
 
     }
 }

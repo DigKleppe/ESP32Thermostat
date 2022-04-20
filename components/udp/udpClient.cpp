@@ -25,8 +25,6 @@
 //#include "addr_from_stdin.h"
 
 
-#define PORT 5000
-
 static const char *TAG = "udpClient";
 //static const char *payload = "Message from ESP32 ";
 //
@@ -72,7 +70,7 @@ int UDPsendMssg( int port, void * mssg, int len) {
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(port);
 	servaddr.sin_addr.s_addr = INADDR_ANY;
-	inet_pton(AF_INET, "192.168.2.255", &servaddr.sin_addr.s_addr);
+//	inet_pton(AF_INET, "192.168.2.255", &servaddr.sin_addr.s_addr);
 	setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &opt, sizeof(opt));
 
    // int err = sendto(sockfd, payload, strlen(payload), 0, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
@@ -81,7 +79,7 @@ int UDPsendMssg( int port, void * mssg, int len) {
     if (err < 0) {
         ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
     }
-    ESP_LOGI(TAG, "Message sent");
+    ESP_LOGI(TAG, "Message sent to port: %d", port);
 
 
 	close(sockfd);

@@ -25,7 +25,7 @@ class StatusIndicator {
 public:
 	StatusIndicator(lv_obj_t * parent);
 	virtual ~StatusIndicator();
-	void setSymbol ( char *);
+	void setSymbol (const char *);
 private:
 	lv_obj_t * _parent;
 	lv_obj_t * label;

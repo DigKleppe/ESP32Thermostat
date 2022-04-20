@@ -13,6 +13,7 @@
 #include "guiCommonTask.h"
 #include "backGround.h"
 #include "fonts.h"
+#include "settings.h"
 
 #define PADDING 10
 #define ITEMHEIGHT	95
@@ -20,10 +21,10 @@
 
 
 
-static mainScreenVars_t vars;
+//static mainScreenVars_t vars;
 
 const char * cbText[NR_CHECKBOXES] = {"Verwarming", "Koeling" };
-const bool * cbVar[NR_CHECKBOXES] = {  &vars.heatingOn ,&vars.coolingOn };
+const bool * cbVar[NR_CHECKBOXES] = {  &userSettings.heatingOn ,&userSettings.coolingOn };
 
 
 SpinBoxDescr_t spinBoxDescrTemperatuur = {
@@ -32,7 +33,7 @@ SpinBoxDescr_t spinBoxDescrTemperatuur = {
 	.maxVal = 25.0,
 	.minVal = 10.0,
 	.step = 0.1,
-	.var = &vars.tempSetPoint,
+	.var = &userSettings.temperatureSetpoint,
 };
 
 
@@ -62,10 +63,9 @@ void MainScreen::event_handler(lv_event_t * e)
 MainScreen::MainScreen() {
 	screen = lv_obj_create(NULL);
 
-
 	backGround =  makeBackGround(screen);
 	clockDisplay = new ClockDisplay(backGround);
-	statusIndicator = new StatusIndicator ( backGround);
+//	statusIndicator = new StatusIndicator ( backGround);
 //	measDisplay = new MeasDisplay(backGround, 40,"Temperatuur", "\xC2\xB0" "C", "%2.1f");
 
 	spinBoxTemperatuur = new SpinBox(backGround, 1, &spinBoxDescrTemperatuur );
@@ -82,28 +82,33 @@ MainScreen::MainScreen() {
 	navigArrows = new NavigArrows(backGround, true, true);
 }
 
-void MainScreen::setValues(mainScreenVars_t *p){
-	vars = *p;
-//	measDisplay->setValue(p->temperature);
+//void MainScreen::setValues(mainScreenVars_t *p){
+//	vars = *p;
+//	update();
+//
+//}
+//
+//void MainScreen::getValues(mainScreenVars_t *p){
+//	*p = vars;
+//}
+
+void MainScreen::update (void) {
 	spinBoxTemperatuur->upDate();
-	if ( vars.heatingOn)
+	if ( userSettings.heatingOn)
 		lv_obj_add_state(cb[CBHEATING], LV_STATE_CHECKED);
 	else
 		lv_obj_clear_state(cb[CBHEATING], LV_STATE_CHECKED);
 
-	if ( vars.coolingOn)
+	if ( userSettings.coolingOn)
 		lv_obj_add_state(cb[CBCOOLING], LV_STATE_CHECKED);
 	else
 		lv_obj_clear_state(cb[CBCOOLING], LV_STATE_CHECKED);
 }
 
-void MainScreen::getValues(mainScreenVars_t *p){
-	*p = vars;
-}
-
 
 void MainScreen::show() {
 	lv_scr_load(screen);
+	update();
 
 }
 
