@@ -129,6 +129,8 @@ void sensirionTask(void *pvParameter) {
 				lastVal.timeStamp = timeStamp++;
 				xSemaphoreGive(I2CSemaphore);
 				displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
+				updatePID(lastVal.temperature);
+				lastVal.PIDsetting = PIDsetting;
 
 				for (int n = 0; n < 3; n++) {
 					displayMssg.line = n;
@@ -158,8 +160,7 @@ void sensirionTask(void *pvParameter) {
 
 				sprintf( str, "1:%d",lastVal.co2);
 				UDPsendMssg(UDPTXPORT, str , strlen(str));
-				updatePID(lastVal.temperature);
-				lastVal.PIDsetting = PIDsetting;
+
 				tLog[logTxIdx] = lastVal;
 				logTxIdx++;
 				if (logTxIdx >= MAXLOGVALUES)

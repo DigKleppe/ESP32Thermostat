@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 
-InfoDisplay::InfoDisplay(lv_obj_t * parent, int line,  infoDescr_t *descr )
+InfoDisplay::InfoDisplay(lv_obj_t * parent, int line,  const infoDescr_t *descr )
 {
 	_parent = parent;
 	_descr = descr;
@@ -29,13 +29,14 @@ InfoDisplay::InfoDisplay(lv_obj_t * parent, int line,  infoDescr_t *descr )
 
 void InfoDisplay::Update ( void){
 	char str [20];
+
 	if ( strstr(_descr->format, "s"))
-		sprintf ( str , _descr->format, _descr->value);
+		snprintf ( str , sizeof(str)-1, _descr->format, _descr->value);
 	else
 		if ( strstr(_descr->format, "d"))
-			sprintf ( str , _descr->format, *( int *)  _descr->value);
+			snprintf ( str, sizeof(str)-1 , _descr->format, *( int *)  _descr->value);
 		else
-			sprintf ( str , _descr->format, *( float *)  _descr->value);
+			snprintf ( str, sizeof(str)-1 , _descr->format, *( float *)  _descr->value);
 
 	lv_label_set_text(textDisplay,str);
 }

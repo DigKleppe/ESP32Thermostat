@@ -25,7 +25,7 @@ typedef struct {
 
 class InfoDisplay {
 public:
-	InfoDisplay(lv_obj_t * parent,  int line, infoDescr_t *descr);
+	InfoDisplay(lv_obj_t * parent,  int line,const infoDescr_t *descr);
 	virtual ~InfoDisplay();
 	void Update (void);
 
@@ -33,7 +33,7 @@ private:
 	lv_obj_t* _parent;
 	lv_obj_t* label;
 	lv_obj_t* textDisplay;
-	infoDescr_t * _descr;
+	const infoDescr_t * _descr;
 };
 
 #endif /* GUI_CLOCKDISPLAY_H_ */

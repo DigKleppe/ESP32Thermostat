@@ -36,14 +36,10 @@ SettingsScreen::SettingsScreen( const SpinBoxDescr_t  * descr) {
 			spinBox[n] = new SpinBox ( backGround, n, descr);
 		descr++;
 	}  while((n < (NR_SPINBOXES-1)) && (descr->name != NULL));
-
-
-#ifndef LGL_SIMULATOR
-		vTaskDelay(50/portTICK_PERIOD_MS);
-#endif
 	upDate();
-
 	navigArrows = new NavigArrows(backGround, true, true);
+
+
 
 }
 

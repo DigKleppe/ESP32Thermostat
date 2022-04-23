@@ -16,7 +16,7 @@
 //};
 
 
-InfoScreen::InfoScreen(infoDescr_t * descr ) {
+InfoScreen::InfoScreen(const infoDescr_t * descr ) {
 	int n = -1;
 	lv_obj_t * backGround;
 
@@ -40,7 +40,7 @@ void InfoScreen::upDate (void) {
 		if (display[n] != NULL)
 			display[n]->Update();
 		else
-			break;
+			n = MAXNR_INFO;
 	}  while(n++ < MAXNR_INFO);
 }
 

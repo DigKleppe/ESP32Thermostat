@@ -48,6 +48,10 @@ MeasScreen::MeasScreen( ) {
 		measDisplay[n] = new MeasDisplay (backGround,FIRSTY + n * (ITEMHEIGHT + PADDING) + PADDING,  name[n], units[n], formats[n]);
 	}
 	navigArrows = new NavigArrows(backGround, true, true);
+
+	setStatsuIndicator(HEATING_ON);
+
+
 }
 
 void MeasScreen::setDisplayText(int line, char *text) {

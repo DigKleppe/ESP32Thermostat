@@ -12,7 +12,7 @@
 //#include "MessageScreen.h"
 #include "SettingsScreen.h"
 #include "MainScreen.h"
-
+#include "InfoScreen.h"
 #include "guiTask.h"
 #include "guiCommonTask.h"
 #include "SettingsScreen.h"
@@ -38,10 +38,14 @@ SettingsScreen *settingsScreen1;
 SettingsScreen *settingsScreen2;
 MainScreen *mainScreen;
 MeasScreen *measScreen;
+InfoScreen *infoScreen;
 
 int screenIdx;
+extern float PIDsetting;
+extern char myIP[];
 
-#define NRSCREENS 4
+
+#define NRSCREENS 5
 
 
 const SpinBoxDescr_t settingsScreenDescr1[] = {
@@ -103,6 +107,12 @@ const SpinBoxDescr_t settingsScreenDescr2[] = {
 	}
 };
 
+const infoDescr_t infoDesc[] = {
+	{"Netwerk:" ,"%s", userSettings.SSID },
+	{"IPadres:","%s",myIP },
+	{"PID:","%2.2f", &PIDsetting },
+	{NULL,NULL ,NULL}
+};
 
 
 
@@ -119,6 +129,9 @@ void showScreen(int idx) {
 		break;
 	case 3:
 		settingsScreen2->show();
+		break;
+	case 4:
+		infoScreen->show();
 		break;
 
 	default:
@@ -156,12 +169,12 @@ void guiTask(void *pvParameter) {
 	while (!displayReady)
 		vTaskDelay(100 / portTICK_RATE_MS);
 
-	settingsScreen1 = new SettingsScreen(&settingsScreenDescr1[0]);
-	settingsScreen2 = new SettingsScreen(&settingsScreenDescr2[0]);
-//	settingsScreen2 = new SettingsScreen(&settingsScreenDescr1[0]);
+	settingsScreen1 = new SettingsScreen(settingsScreenDescr1);
+	settingsScreen2 = new SettingsScreen(settingsScreenDescr2);
 	mainScreen = new MainScreen();
 	measScreen = new MeasScreen();
-
+	infoScreen = new InfoScreen(infoDesc);
+	vTaskDelay(50/portTICK_PERIOD_MS);
 	showScreen(0);
 
 //	vTaskDelay( 100/portTICK_PERIOD_MS);

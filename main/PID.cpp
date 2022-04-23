@@ -19,7 +19,7 @@ thermostatStatus_t thermostatStatus;
 
 
 void heatingOff(){
-	gpio_set_level(HEATING_PIN, 0);
+	gpio_set_level(HEATING_PIN, 1);
 	thermostatStatus = THERMOSTATOFF;
 
 }
@@ -28,17 +28,22 @@ void heatingOn(){
 		gpio_set_level(HEATING_PIN, 1);
 		thermostatStatus = HEATING_ON;
 	}
+	else
+		thermostatStatus = THERMOSTATOFF;
 }
 
 void coolingOn(){
 	if ( userSettings.coolingOn) {
-		gpio_set_level(COOLING_PIN, 1);
+		gpio_set_level(COOLING_PIN, 0);
 		thermostatStatus = COOLING_ON;
 	}
+	else
+		thermostatStatus = THERMOSTATOFF;
+
 }
 
 void coolingOff(){
-	gpio_set_level(COOLING_PIN, 0);
+	gpio_set_level(COOLING_PIN, 1);
 	thermostatStatus = THERMOSTATOFF;
 }
 

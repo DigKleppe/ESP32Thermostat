@@ -12,7 +12,7 @@
 StatusIndicator::StatusIndicator(lv_obj_t * parent) {
 	_parent = parent;
 	label = lv_label_create ( _parent);
-	lv_obj_add_style( label, &styleInfo,0);
+	lv_obj_add_style( label, &styleSymbol,0);
 	lv_obj_align(label, LV_ALIGN_TOP_RIGHT, 0,0);
 	lv_label_set_text(label,NULL);
 }

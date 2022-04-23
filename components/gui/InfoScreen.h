@@ -23,7 +23,7 @@
 
 class InfoScreen {
 public:
-	InfoScreen(infoDescr_t * descr);
+	InfoScreen(const infoDescr_t * descr);
 	virtual ~InfoScreen();
 	void upDate (void);
 	void show();
