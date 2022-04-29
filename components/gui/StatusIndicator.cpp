@@ -19,7 +19,13 @@ StatusIndicator::StatusIndicator(lv_obj_t * parent) {
 
 
 void StatusIndicator::setSymbol ( const char *symbol) {
-	lv_label_set_text(label,symbol);
+	if ( symbol == NULL)
+		lv_obj_add_flag(label, LV_OBJ_FLAG_HIDDEN);
+	else {
+		lv_label_set_text(label,symbol);
+		lv_obj_clear_flag(label, LV_OBJ_FLAG_HIDDEN);
+	}
+
 }
 
 StatusIndicator::~StatusIndicator() {

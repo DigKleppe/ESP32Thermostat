@@ -29,6 +29,7 @@ typedef struct {
 	float controlInterval;
 	bool heatingOn;
 	bool coolingOn;
+	float backLigth;
 	char checkstr[MAX_STRLEN+1];
 }userSettings_t;
 
@@ -47,7 +48,7 @@ extern bool settingsChanged;
 esp_err_t saveUserSettings( void);
 esp_err_t loadUserSettings( void);
 
-extern userSettings_t 			userSettings;
+extern userSettings_t 	userSettings;
 
 
 #endif /* SETTINGS_H_ */

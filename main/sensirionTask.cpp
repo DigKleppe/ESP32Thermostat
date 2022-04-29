@@ -116,7 +116,7 @@ void sensirionTask(void *pvParameter) {
 	displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
 	airSensor.setMeasurementInterval(MEASINTERVAL);
 	airSensor.setAutoSelfCalibration(true);
-	airSensor.setTemperatureOffset(2.0);
+	airSensor.setTemperatureOffset(userSettings.temperatureOffset);  // 3.1
 	xSemaphoreGive(I2CSemaphore);
 	//testLog();
 

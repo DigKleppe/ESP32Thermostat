@@ -15,7 +15,6 @@
 #define STORAGE_NAMESPACE "storage"
 
 extern settingsDescr_t settingsDescr[];
-//extern char * myIpAddr;
 extern int myRssi;
 bool settingsChanged;
 
@@ -23,7 +22,7 @@ char checkstr[MAX_STRLEN+1];
 
 const userSettings_t userSettingsDefaults = {
 	{.SSID= "Klepnet"},
-	{.pwd = "Yellowstone1999"},
+	{.pwd = "xxxxx"},
 	.temperatureSetpoint = 19.0,
 	.temperatureOffset = 3.0,
 	.PIDp = 10.0,
@@ -32,6 +31,7 @@ const userSettings_t userSettingsDefaults = {
 	.controlInterval = 15,
 	.heatingOn = true,
 	.coolingOn = true,
+	.backLigth = 40,
 	{.checkstr = CHECKSTR}
 };
 

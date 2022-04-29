@@ -264,7 +264,7 @@ function timer() {
 				if (arr[0] > 0) {
 					if (arr[0] != lastTimeStamp) {
 						lastTimeStamp = arr[0];
-						for (var m = 1; m < 4; m++) { // time not used for now 
+						for (var m = 1; m < =4; m++) { // time not used for now 
 							var value = parseFloat(arr[m]); // from string to float
 							if (value < -100)
 								arr[m] = "--";
@@ -273,7 +273,9 @@ function timer() {
 
 						plotTempAndRH(1, arr[1]); // temperature
 						plotTempAndRH(2, arr[2]); // RH
+						plotTempAndRH(3, arr[4]); // PID
 						plotCO2(1, arr[3]); // CO2
+
 						updateLastDayTimeLabel(tempAndRHdata);
 						updateLastDayTimeLabel(CO2Data);
 						tRHchart.draw(tempAndRHdata, tempAndRHoptions);

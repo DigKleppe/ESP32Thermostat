@@ -49,7 +49,7 @@ MeasScreen::MeasScreen( ) {
 	}
 	navigArrows = new NavigArrows(backGround, true, true);
 
-	setStatsuIndicator(HEATING_ON);
+	setStatusIndicator(HEATING_ON);
 
 
 }
@@ -57,7 +57,7 @@ MeasScreen::MeasScreen( ) {
 void MeasScreen::setDisplayText(int line, char *text) {
 	measDisplay[line]->setText ( text);
 	if ( line == 1)
-		setStatsuIndicator(thermostatStatus);
+		setStatusIndicator(thermostatStatus);
 //	if (strlen ( text) > MAXVALUECHARS)
 //		text[MAXVALUECHARS+1] = 0; // terminate
 //	lv_label_set_text(valueLabel[line], text);
@@ -69,7 +69,7 @@ void MeasScreen::setDisplayValue(int line , float value) {
 }
 
 
-void MeasScreen::setStatsuIndicator (thermostatStatus_t status) {
+void MeasScreen::setStatusIndicator (thermostatStatus_t status) {
 	switch (status) {
 	case THERMOSTATOFF:
 		statusIndicator->setSymbol(NULL);

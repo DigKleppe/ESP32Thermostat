@@ -102,11 +102,8 @@ uint32_t stackWm[5];
 extern "C" {
 void app_main() {
 	int minuteCntr = 0;
-    int level = 0;
 	char str[25];
 	char str2[25];
-	int cntr=1;
-	int dummy = 0;
 
 	displayMssg_t displayMssg;
 	displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
@@ -152,13 +149,14 @@ void app_main() {
 	while ( ! displayReady )
 		vTaskDelay (10/portTICK_PERIOD_MS);
 
-	setBacklight(40);
+	setBacklight(userSettings.backLigth);
 
 	while(1) {
 		vTaskDelay( 1000 / portTICK_PERIOD_MS);
 
 		if (settingsChanged) {
 			minuteCntr = 60;
+			setBacklight(userSettings.backLigth);
 			settingsChanged = false;
 		}
 		if (minuteCntr) {

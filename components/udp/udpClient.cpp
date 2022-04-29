@@ -16,44 +16,13 @@
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_netif.h"
-//#include "protocol_examples_common.h"
 
 #include "lwip/err.h"
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
-//#include "addr_from_stdin.h"
-
 
 static const char *TAG = "udpClient";
-//static const char *payload = "Message from ESP32 ";
-//
-//
-//
-///*
-// ============================================================================
-// Name        : udpSend.c
-// Author      :
-// Version     :
-// Copyright   : Your copyright notice
-// Description : Hello World in C, Ansi-style
-// ============================================================================
-// */
-//
-//#include <stdio.h>
-//#include <stdlib.h>
-//
-//
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <unistd.h>
-//#include <string.h>
-//#include <sys/types.h>
-//#include <sys/socket.h>
-//#include <arpa/inet.h>
-//#include <netinet/in.h>
-//#include <unistd.h>
-// Driver code
 
 int UDPsendMssg( int port, void * mssg, int len) {
 	int sockfd;
@@ -63,7 +32,7 @@ int UDPsendMssg( int port, void * mssg, int len) {
 	// Creating socket file descriptor
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 		perror("socket creation failed");
-		exit (EXIT_FAILURE);
+		return -1;
 	}
 
 	memset(&servaddr, 0, sizeof(servaddr));

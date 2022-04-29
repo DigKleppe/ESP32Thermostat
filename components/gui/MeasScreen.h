@@ -40,7 +40,7 @@ public:
 	void setDisplayValue(int line , float value);
 	void setDisplayValue(int line , int value);
 	void setValueAndName(int line, const char *value, const char *name);
-	void setStatsuIndicator (thermostatStatus_t);
+	void setStatusIndicator (thermostatStatus_t);
 //	void setStatusLine (const char * text);
 
 	lv_obj_t * screen;
