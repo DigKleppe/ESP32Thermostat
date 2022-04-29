@@ -25,7 +25,7 @@ void heatingOff(){
 }
 void heatingOn(){
 	if ( userSettings.heatingOn) {
-		gpio_set_level(HEATING_PIN, 1);
+		gpio_set_level(HEATING_PIN, 0);
 		thermostatStatus = HEATING_ON;
 	}
 	else
