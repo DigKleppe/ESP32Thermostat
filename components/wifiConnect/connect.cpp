@@ -81,7 +81,7 @@ esp_err_t loadWifiSettings(void);
 //wifiSettings_t wifiSettings = { { .SSID = "ESP32" }, { .pwd = "ESP32" }, .updated = false };
 wifiSettings_t wifiSettings = { { .SSID = "Klepnet" }, { .pwd = "Yellowstone1999" }, .updated = false };
 static esp_netif_t *wifiNetif = NULL;
-static bool connected = false;
+bool connected = false;
 static EventGroupHandle_t s_wifi_event_group;
 
 esp_netif_t* wifi_start(void);

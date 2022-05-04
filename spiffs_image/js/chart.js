@@ -126,8 +126,10 @@ function initChart() {
 	dontDraw = false;
 	if (SIMULATE)
 		simplot();
-	else
+	else {
 		startTimer();
+	}
+	
 }
 
 function startTimer() {
@@ -264,7 +266,7 @@ function timer() {
 				if (arr[0] > 0) {
 					if (arr[0] != lastTimeStamp) {
 						lastTimeStamp = arr[0];
-						for (var m = 1; m < =4; m++) { // time not used for now 
+						for (var m = 1; m <= 4; m++) { // time not used for now 
 							var value = parseFloat(arr[m]); // from string to float
 							if (value < -100)
 								arr[m] = "--";

@@ -25,6 +25,8 @@
   Please see LICENSE.md for more details.
 */
 
+#define TAG  "SDC30"
+
 #include "SparkFun_SCD30_Arduino_Library.h"
 
 SCD30::SCD30(void)
@@ -62,11 +64,12 @@ bool SCD30::begin(TwoWire &wirePort, bool autoCalibrate, bool measBegin)
   if (getFirmwareVersion(&fwVer) == false) // Read the firmware version. Return false if the CRC check fails.
     return (false);
 
-  if (_printDebug == true)
-  {
-    _debugPort->print(F("SCD30 begin: got firmware version 0x"));
-    _debugPort->println(fwVer, HEX);
-  }
+//  if (_printDebug == true)
+//  {
+//    _debugPort->print(F("SCD30 begin: got firmware version 0x"));
+//    _debugPort->println(fwVer, HEX);
+//  }
+  ESP_LOGE(TAG, "begin: got firmware version %x", fwVer);
 
   if (measBegin == false) // Exit now if measBegin is false
     return (true);

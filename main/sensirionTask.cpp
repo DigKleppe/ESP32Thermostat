@@ -16,6 +16,7 @@
 #include "udpClient.h"
 #include "PID.h"
 #include "settings.h"
+#include "ntcTask.h"
 
 
 #include "SparkFun_SCD30_Arduino_Library.h"
@@ -87,9 +88,14 @@ void testLog(void) {
 float getTemperature (void) {
 	return lastVal.temperature;
 }
+extern bool connected;
+
+float to; // test
 
 void sensirionTask(void *pvParameter) {
-
+    time_t now = 0;
+    struct tm timeinfo;
+    int lastminute = -1;
 	SCD30 airSensor;
 	char str[25];
 	char str2[25];
@@ -98,33 +104,77 @@ void sensirionTask(void *pvParameter) {
 	displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
 	displayMssg.str1 = str;
 	displayMssg.str2 = str2;
+	int sensirionTimeoutTimer = 60;
 
 	while( displayMssgBox == NULL){ // wait for display
 		vTaskDelay(100 / portTICK_PERIOD_MS);
 	}
+	time(&now);
 	xSemaphoreTake(I2CSemaphore, portMAX_DELAY);
-	while (airSensor.begin(Wire,false, false) == false) {
+
+	while ((airSensor.begin(Wire,false, false) == false) && (sensirionTimeoutTimer-- >0))
+	{
+		airSensor.reset();
 		Serial.println("Air sensor not detected");
+
 		xSemaphoreGive(I2CSemaphore);
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		vTaskDelay(200 / portTICK_PERIOD_MS);
 		xSemaphoreTake(I2CSemaphore, portMAX_DELAY);
-		sprintf( str,"wacht op sensor ...");
-		displayMssg.displayItem = DISPLAY_ITEM_STATUSLINE;
-		xQueueSend( displayMssgBox, &displayMssg, 0 );
-		xQueueReceive(displayReadyMssgBox, &dummy, 500/portTICK_PERIOD_MS); // if accepted wait until data is displayed
 	}
 	displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
 	airSensor.setMeasurementInterval(MEASINTERVAL);
 	airSensor.setAutoSelfCalibration(true);
-	airSensor.setTemperatureOffset(userSettings.temperatureOffset);  // 3.1
+	airSensor.setTemperatureOffset(3.0);
+
+	to = 	airSensor.getTemperatureOffset();
+
 	xSemaphoreGive(I2CSemaphore);
+	sensirionTimeoutTimer = 60;
 	//testLog();
 
+
 	while (1) {
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+		lastVal.temperature  = NTCtemperature- userSettings.temperatureOffset;  // SDC30 not accurate enough
+		displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
+
+		if (sensirionTimeoutTimer-- == 0) {
+
+			Serial.println("Air sensor timeout");
+			for (int n = 0; n < 3; n++) {
+				displayMssg.line = n;
+
+				switch (n) {
+				case 0:
+					sprintf(str, "%2.1f", lastVal.temperature);
+					break;
+				case 1:
+				case 2:
+					sprintf(str, "-----");
+
+					break;
+				}
+				xQueueReceive(displayReadyMssgBox, &dummy, 0); // empty mssgbox
+				if ( xQueueSend( displayMssgBox, &displayMssg, 0 ) == pdPASS)
+					xQueueReceive(displayReadyMssgBox, &dummy,
+							500 / portTICK_PERIOD_MS); // if accepted wait until data is displayed
+			}
+			xSemaphoreTake(I2CSemaphore, portMAX_DELAY);
+			airSensor.reset();
+
+			sensirionTimeoutTimer = 100;
+			while ((airSensor.begin(Wire,false, false) == false) && (sensirionTimeoutTimer-- >0));
+			xSemaphoreGive(I2CSemaphore);
+			vTaskDelay(200 / portTICK_PERIOD_MS);
+		}
+
+
 		if (pdTRUE == xSemaphoreTake(I2CSemaphore, portMAX_DELAY)) {
 			if (airSensor.dataAvailable()) {
+				sensirionTimeoutTimer = 60;
 				lastVal.co2  = airSensor.getCO2();
-				lastVal.temperature  = airSensor.getTemperature() - userSettings.temperatureOffset;
+			//	lastVal.temperature  = airSensor.getTemperature() - userSettings.temperatureOffset;
 				lastVal.hum  = airSensor.getHumidity();
 				lastVal.timeStamp = timeStamp++;
 				xSemaphoreGive(I2CSemaphore);
@@ -161,18 +211,17 @@ void sensirionTask(void *pvParameter) {
 				sprintf( str, "1:%d",lastVal.co2);
 				UDPsendMssg(UDPTXPORT, str , strlen(str));
 
-				tLog[logTxIdx] = lastVal;
-				logTxIdx++;
-				if (logTxIdx >= MAXLOGVALUES)
-					logTxIdx = 0;
-
-				if ( MEASINTERVAL > 5)
-					vTaskDelay((MEASINTERVAL - 5) *1000 / portTICK_PERIOD_MS);
-
-			} else {
-				xSemaphoreGive(I2CSemaphore);
-				vTaskDelay(1000 / portTICK_PERIOD_MS);
+				time(&now);
+				localtime_r(&now, &timeinfo);
+				if (lastminute != timeinfo.tm_min ) {
+					 lastminute = timeinfo.tm_min;   // every minute
+					 tLog[logTxIdx] = lastVal;
+					 logTxIdx++;
+					 if (logTxIdx >= MAXLOGVALUES)
+						logTxIdx = 0;
+				}
 			}
+			xSemaphoreGive(I2CSemaphore);
 		}
 	}
 }

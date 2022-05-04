@@ -43,6 +43,7 @@ InfoScreen *infoScreen;
 int screenIdx;
 extern float PIDsetting;
 extern char myIP[];
+extern uint32_t upTime;
 
 
 #define NRSCREENS 5
@@ -119,6 +120,7 @@ const infoDescr_t infoDesc[] = {
 	{"Netwerk:" ,"%s", userSettings.SSID },
 	{"IPadres:","%s",myIP },
 	{"PID:","%2.2f", &PIDsetting },
+	{"Optijd:","%d", &upTime },
 	{NULL,NULL ,NULL}
 };
 

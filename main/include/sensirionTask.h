@@ -9,7 +9,8 @@
 #define MAIN_INCLUDE_SENSIRIONTASK_H_
 
 
-#define MEASINTERVAL			 	60  // interval for sensiron sensor in seconds
+#define MEASINTERVAL			 	20  // interval for sensiron sensor in seconds
+#define LOGINTERVAL					60
 
 float getTemperature (void);
 

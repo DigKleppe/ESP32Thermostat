@@ -3329,6 +3329,16 @@
 			<location>/home/dig/esp/esp-idf4.4/esp-idf-v4.4/components/json/cJSON/cJSON_Utils.c</location>
 		</link>
 		<link>
+			<name>esp_idf_components/klp/averager/averager.cpp</name>
+			<type>1</type>
+			<location>/home/dig/esp/esp-idf4.4/esp-idf-v4.4/components/klp/averager/averager.cpp</location>
+		</link>
+		<link>
+			<name>esp_idf_components/klp/keys/keys.cpp</name>
+			<type>1</type>
+			<location>/home/dig/esp/esp-idf4.4/esp-idf-v4.4/components/klp/keys/keys.cpp</location>
+		</link>
+		<link>
 			<name>esp_idf_components/lash/esp32/flash_ops_esp32.c</name>
 			<type>1</type>
 			<location>/home/dig/esp/esp-idf/components/spi_flash/esp32/flash_ops_esp32.c</location>

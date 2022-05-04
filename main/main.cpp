@@ -45,6 +45,7 @@ idf.py monitor -p /dev/ttyUSB2
 #include "guiTask.h"
 #include "guiCommonTask.h"
 #include "clockTask.h"
+#include "ntcTask.h"
 #include "settings.h"
 #include "PID.h"
 
@@ -96,9 +97,13 @@ TaskHandle_t  guiCommonTaskh;
 TaskHandle_t  guiTaskh;
 TaskHandle_t  SensirionTaskh;
 TaskHandle_t  connectTaskh;
+TaskHandle_t  ntcTaskh;
 
 extern bool settingsChanged; // from settingsScreen
 uint32_t stackWm[5];
+
+uint32_t upTime;
+
 extern "C" {
 void app_main() {
 	int minuteCntr = 0;
@@ -142,7 +147,9 @@ void app_main() {
 
     xTaskCreatePinnedToCore(guiCommonTask, "guicommon", 4096*2, NULL, 0, &guiCommonTaskh, 1);
 	xTaskCreatePinnedToCore(guiTask, "guiTask", 4096 , NULL, 0, &guiTaskh, 1);
-	xTaskCreate(sensirionTask, "sensirionTask", 2048, NULL, 0, &SensirionTaskh);
+	xTaskCreate(sensirionTask, "sensirionTask", 4*1024, NULL, 0, &SensirionTaskh);
+	xTaskCreate(ntcTask, "ntcTask", 2*1024, NULL, 0, &ntcTaskh);
+
 	connect(&connectTaskh);
 	xTaskCreate(clockTask, "clock", 2*1024, NULL, 0, NULL);
 
@@ -153,6 +160,7 @@ void app_main() {
 
 	while(1) {
 		vTaskDelay( 1000 / portTICK_PERIOD_MS);
+		upTime++;
 
 		if (settingsChanged) {
 			minuteCntr = 60;

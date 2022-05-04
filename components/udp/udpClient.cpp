@@ -38,7 +38,7 @@ int UDPsendMssg( int port, void * mssg, int len) {
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(port);
-	servaddr.sin_addr.s_addr = INADDR_ANY;
+	servaddr.sin_addr.s_addr = IPADDR_BROADCAST;// INADDR_ANY;
 //	inet_pton(AF_INET, "192.168.2.255", &servaddr.sin_addr.s_addr);
 	setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &opt, sizeof(opt));
 
