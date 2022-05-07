@@ -49,7 +49,7 @@ void coolingOff(){
 
 // called from sensirionTask every MEASINTERVAL seconds
 
-static void setPWM(int perc) {
+void setPWM(int perc) {
 	static int onTimer;
 	static int offTimer;
 	static int lastPerc = 999;

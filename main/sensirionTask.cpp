@@ -91,6 +91,8 @@ float getTemperature (void) {
 extern bool connected;
 
 float to; // test
+void setPWM(int perc);
+
 
 void sensirionTask(void *pvParameter) {
     time_t now = 0;
@@ -131,8 +133,6 @@ void sensirionTask(void *pvParameter) {
 	xSemaphoreGive(I2CSemaphore);
 	sensirionTimeoutTimer = 60;
 	//testLog();
-
-
 	while (1) {
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 

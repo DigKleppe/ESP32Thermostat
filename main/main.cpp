@@ -128,6 +128,9 @@ void app_main() {
 	gpio_pad_select_gpio(HEATING_PIN);
 	gpio_set_direction(HEATING_PIN, GPIO_MODE_OUTPUT);
 
+	gpio_set_drive_capability(HEATING_PIN,GPIO_DRIVE_CAP_3);
+	gpio_set_drive_capability(COOLING_PIN,GPIO_DRIVE_CAP_3);
+
 	I2CSemaphore = xSemaphoreCreateMutex();
 	Wire.begin(SDA_PIN, SCL_PIN, (uint32_t) I2C_CLK);
 	Serial.begin(115200);
