@@ -126,6 +126,9 @@ void updatePID(float temperature) {
 	delta = userSettings.temperatureSetpoint - temperature;
 	result = delta * userSettings.PIDp;
 	iSum += delta * userSettings.PIDi;
+	if ( userSettings.heatingOn && (delta < 0)) // temperature above setpoint
+		iSum = 0; // zero i to avoid overshoot
+
 	if (iSum > 0) {
 		if (iSum > userSettings.PIDmaxi)  // limit to maxI
 			iSum = userSettings.PIDmaxi;
@@ -133,7 +136,16 @@ void updatePID(float temperature) {
 		if (iSum < -1 * userSettings.PIDmaxi) // or negative value
 			iSum = -1 * userSettings.PIDmaxi;
 	}
-
+	if ( !userSettings.heatingOn )
+	{
+		if ( iSum > 0 ) // limit to zero if heating is off
+			iSum = 0;
+	}
+	if ( !userSettings.coolingOn )
+	{
+		if ( iSum < 0 ) // limit to zero if cooling is off
+			iSum = 0;
+	}
 	printf("\ndelta: %f P:%f I:%f ", delta, result, iSum);
 
 	result += iSum;

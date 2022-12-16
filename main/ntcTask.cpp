@@ -45,7 +45,7 @@ static const char *TAG = "NTCTask";
 
 static esp_adc_cal_characteristics_t adc1_chars;
 
-Averager averager(32);
+Averager averager(62);
 float NTCtemperature = -1;
 
 

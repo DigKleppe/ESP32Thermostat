@@ -24,14 +24,14 @@ const userSettings_t userSettingsDefaults = {
 	{.SSID= "Klepnet"},
 	{.pwd = "xxxxx"},
 	.temperatureSetpoint = 19.0,
-	.temperatureOffset = 3.0,
-	.PIDp = 10.0,
-	.PIDi = 1.0,
-	.PIDmaxi = 100,
+	.temperatureOffset = 1.5,
+	.PIDp = 5.0,
+	.PIDi = 0.2,
+	.PIDmaxi = 20,
 	.controlInterval = 15,
 	.heatingOn = true,
 	.coolingOn = true,
-	.backLigth = 40,
+	.backLigth = 15,
 	{.checkstr = CHECKSTR}
 };
 

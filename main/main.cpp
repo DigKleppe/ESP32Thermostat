@@ -176,7 +176,6 @@ void app_main() {
 				saveUserSettings(); // save setttings after delay
 		}
 
-
 //		stackWm[0] = uxTaskGetStackHighWaterMark( connectTaskh );
 //		stackWm[1] = uxTaskGetStackHighWaterMark( guiCommonTaskh );
 //		stackWm[2] = uxTaskGetStackHighWaterMark( guiTaskh );
