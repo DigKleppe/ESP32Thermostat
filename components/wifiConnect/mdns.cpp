@@ -1,59 +1,28 @@
-
-//void test ( void) {
-//
-//}
-
 /*
- * test.cpp
+ * mdns.cpp
  *
  *  Created on: Jan 16, 2022
  *      Author: dig
  */
-
-
-
 #include <string.h>
-#include "protocol_examples_common.h"
 #include "sdkconfig.h"
-#include "esp_event.h"
-#include "esp_wifi.h"
-#include "esp_wifi_default.h"
-#if CONFIG_EXAMPLE_CONNECT_ETHERNET
-#include "esp_eth.h"
-#if CONFIG_ETH_USE_SPI_ETHERNET
-#include "driver/spi_master.h"
-#endif // CONFIG_ETH_USE_SPI_ETHERNET
-#endif // CONFIG_EXAMPLE_CONNECT_ETHERNET
 #include "esp_log.h"
-#include "esp_netif.h"
-#include "driver/gpio.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/event_groups.h"
-#include "lwip/err.h"
-#include "lwip/sys.h"
-
 #include "mdns.h"
-#include "netdb.h"
 
 #define EXAMPLE_MDNS_INSTANCE CONFIG_MDNS_INSTANCE
 static const char *TAG = "mdns";
+
 /** Generate host name based on sdkconfig, optionally adding a portion of MAC address to it.
  *  @return host name string allocated from the heap
  */
 static char* generate_hostname(void)
 {
     return strdup(CONFIG_MDNS_HOSTNAME);
-
 }
 
-
 void initialiseMdns(void)
-
-//void test ( void)
 {
     char * hostname = generate_hostname();
-
     //initialize mDNS
     ESP_ERROR_CHECK( mdns_init() );
     //set mDNS hostname (required if you want to advertise services)

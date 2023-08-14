@@ -8,24 +8,26 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
+#include "esp_log.h"
 
 #include "guiTask.h"
 #include "guiCommonTask.h"
 #include "sensirionTask.h"
-#include "connect.h"
 #include "udpClient.h"
 #include "PID.h"
 #include "settings.h"
 #include "ntcTask.h"
-
-
-#include "SparkFun_SCD30_Arduino_Library.h"
+#include "SCD30.h"
+#include "cgiScripts.h"
 
 #define UDPTXPORT	5001
+#define MAXRETRIES 	5
+#define SCD30_TIMEOUT 600
+
+static const char *TAG = "sensirionTask";
 
 extern int scriptState;
 extern SemaphoreHandle_t I2CSemaphore;  // used by lvgl, shares the same bus
-
 
 #define MAXLOGVALUES			(24*60)
 
@@ -33,27 +35,30 @@ typedef struct {
 	int32_t timeStamp;
 	float temperature;
 	float hum;
-	int32_t co2;
+	float co2;
 	float PIDsetting;
 } log_t;
 
 static log_t tLog[ MAXLOGVALUES];
 static log_t lastVal;
-static int timeStamp =0;
+static log_t rawlastVal;
+static int timeStamp = 0;
 
 static int logTxIdx;
 static int logRxIdx;
+
+static SCD30 airSensor;
 
 void testLog(void) {
 //	logTxIdx = 0;
 	for (int p = 0; p < 20; p++) {
 		tLog[logTxIdx].timeStamp = timeStamp++;
-		tLog[logTxIdx].temperature = 10 + (float) p/10.0;
-		tLog[logTxIdx].hum = 20 + (float) p/3.0;
+		tLog[logTxIdx].temperature = 10 + (float) p / 10.0;
+		tLog[logTxIdx].hum = 20 + (float) p / 3.0;
 		tLog[logTxIdx].co2 = 200 + p;
 		tLog[logTxIdx].PIDsetting = 12.3;
 		logTxIdx++;
-		if (logTxIdx >= MAXLOGVALUES )
+		if (logTxIdx >= MAXLOGVALUES)
 			logTxIdx = 0;
 	}
 //
@@ -85,63 +90,93 @@ void testLog(void) {
 //	printf("\r\n *************\r\n");
 }
 
-float getTemperature (void) {
+float getTemperature(void) {
 	return lastVal.temperature;
 }
 extern bool connected;
 
-float to; // test
 void setPWM(int perc);
 
+esp_err_t initSCD30(void) {
+	int retries = 0;
+	retries = MAXRETRIES;
+	esp_err_t err;
+	do {
+		err = airSensor.setMeasurementInterval(MEASINTERVAL);
+	} while (err != ESP_OK && (retries-- > 0));
+
+	if (err == ESP_OK) {
+		retries = MAXRETRIES;
+		do {
+			err = airSensor.setAutoSelfCalibration(true);
+		} while (err != ESP_OK && (retries-- > 0));
+	}
+
+	if (err == ESP_OK) {
+		retries = MAXRETRIES;
+		do {
+			err = airSensor.setTemperatureOffset(3.0);
+		} while (err != ESP_OK && (retries-- > 0));
+	}
+	if (err == ESP_OK)
+		ESP_LOGI(TAG, "initialized");
+	else
+		ESP_LOGE(TAG, "Error initializing!");
+	return err;
+}
 
 void sensirionTask(void *pvParameter) {
-    time_t now = 0;
-    struct tm timeinfo;
-    int lastminute = -1;
-	SCD30 airSensor;
+	i2c_port_t I2CmasterPort = *(i2c_port_t*) pvParameter;
+	time_t now = 0;
+	struct tm timeinfo;
+	int lastminute = -1;
 	char str[25];
 	char str2[25];
 	uint32_t dummy;
+
 	displayMssg_t displayMssg;
 	displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
 	displayMssg.str1 = str;
 	displayMssg.str2 = str2;
-	int sensirionTimeoutTimer = 60;
+	int sensirionTimeoutTimer = SCD30_TIMEOUT;
 
-	while( displayMssgBox == NULL){ // wait for display
-		vTaskDelay(100 / portTICK_PERIOD_MS);
-	}
+	bool sensirionError = false;
+
+//	while( displayMssgBox == NULL){ // wait for display
+//		vTaskDelay(100 / portTICK_PERIOD_MS);
+//	}
+
 	time(&now);
 	xSemaphoreTake(I2CSemaphore, portMAX_DELAY);
 
-	while ((airSensor.begin(Wire,false, false) == false) && (sensirionTimeoutTimer-- >0))
-	{
+	while ((airSensor.begin(I2CmasterPort, false, false) != ESP_OK) && (sensirionTimeoutTimer-- > 0)) {
 		airSensor.reset();
-		Serial.println("Air sensor not detected");
+
+		ESP_LOGE(TAG, "Air sensor not detected");
 
 		xSemaphoreGive(I2CSemaphore);
 		vTaskDelay(200 / portTICK_PERIOD_MS);
 		xSemaphoreTake(I2CSemaphore, portMAX_DELAY);
 	}
-	displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
-	airSensor.setMeasurementInterval(MEASINTERVAL);
-	airSensor.setAutoSelfCalibration(true);
-	airSensor.setTemperatureOffset(3.0);
 
-	to = 	airSensor.getTemperatureOffset();
+	displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
+	if (initSCD30() != ESP_OK)
+		sensirionError = true;
 
 	xSemaphoreGive(I2CSemaphore);
-	sensirionTimeoutTimer = 60;
+	sensirionTimeoutTimer = SCD30_TIMEOUT;
 	//testLog();
 	while (1) {
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		vTaskDelay(100 / portTICK_PERIOD_MS);
 
-		lastVal.temperature  = NTCtemperature- userSettings.temperatureOffset;  // SDC30 not accurate enough
+		rawlastVal.temperature = NTCtemperature;
+		lastVal.temperature = NTCtemperature - userSettings.temperatureOffset;  // SDC30 not accurate enough, use NTC
+
 		displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
-
+		if (sensirionError)
+			sensirionTimeoutTimer = 0; //
 		if (sensirionTimeoutTimer-- == 0) {
-
-			Serial.println("Air sensor timeout");
+			ESP_LOGE(TAG, "Air sensor timeout");
 			for (int n = 0; n < 3; n++) {
 				displayMssg.line = n;
 
@@ -157,68 +192,69 @@ void sensirionTask(void *pvParameter) {
 				}
 				xQueueReceive(displayReadyMssgBox, &dummy, 0); // empty mssgbox
 				if ( xQueueSend( displayMssgBox, &displayMssg, 0 ) == pdPASS)
-					xQueueReceive(displayReadyMssgBox, &dummy,
-							500 / portTICK_PERIOD_MS); // if accepted wait until data is displayed
+					xQueueReceive(displayReadyMssgBox, &dummy, 500 / portTICK_PERIOD_MS); // if accepted wait until data is displayed
 			}
 			xSemaphoreTake(I2CSemaphore, portMAX_DELAY);
 			airSensor.reset();
+			if (initSCD30() != ESP_OK)
+				sensirionError = true;
+			else
+				sensirionError = false;
 
-			sensirionTimeoutTimer = 100;
-			while ((airSensor.begin(Wire,false, false) == false) && (sensirionTimeoutTimer-- >0));
+			sensirionTimeoutTimer = SCD30_TIMEOUT;
+			while ((airSensor.begin(I2CmasterPort, false, false) != ESP_OK) && (sensirionTimeoutTimer-- > 0))
+				;
+
 			xSemaphoreGive(I2CSemaphore);
 			vTaskDelay(200 / portTICK_PERIOD_MS);
 		}
 
-
 		if (pdTRUE == xSemaphoreTake(I2CSemaphore, portMAX_DELAY)) {
-			if (airSensor.dataAvailable()) {
-				sensirionTimeoutTimer = 60;
-				lastVal.co2  = airSensor.getCO2();
-			//	lastVal.temperature  = airSensor.getTemperature() - userSettings.temperatureOffset;
-				lastVal.hum  = airSensor.getHumidity();
-				lastVal.timeStamp = timeStamp++;
-				xSemaphoreGive(I2CSemaphore);
-				displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
-				updatePID(lastVal.temperature);
-				lastVal.PIDsetting = PIDsetting;
+			if (airSensor.readMeasurement() == ESP_OK) {
+				sensirionTimeoutTimer = SCD30_TIMEOUT;
+				rawlastVal.co2 = airSensor.getCO2();
+				lastVal.co2 = rawlastVal.co2 - userSettings.CO2offset;
+				if (lastVal.co2 > 300) { // first measurement invalid, reject
+					//	lastVal.temperature  = airSensor.getTemperature() - userSettings.temperatureOffset; NTC used
+					rawlastVal.hum = airSensor.getHumidity();
+					lastVal.hum = rawlastVal.hum - userSettings.RHoffset;
 
-				for (int n = 0; n < 3; n++) {
-					displayMssg.line = n;
-					switch (n){
-					case 0:
-						sprintf(str, "%2.1f",lastVal.temperature);
-						break;
-					case 1:
-						sprintf(str, "%2.1f",lastVal.hum);
-						break;
-					case 2:
-						sprintf(str, "%d",lastVal.co2);
-						break;
+					lastVal.timeStamp = timeStamp++;
+					xSemaphoreGive(I2CSemaphore);
+					displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
+					updatePID(lastVal.temperature);
+					lastVal.PIDsetting = PIDsetting;
+					ESP_LOGI(TAG, "t: %f co2:%f", lastVal.temperature, lastVal.co2);
+
+					for (int n = 0; n < 3; n++) {
+						displayMssg.line = n;
+						switch (n) {
+						case 0:
+							sprintf(str, "%2.1f", lastVal.temperature);
+							break;
+						case 1:
+							sprintf(str, "%2.1f", lastVal.hum);
+							break;
+						case 2:
+							sprintf(str, "%2.0f", lastVal.co2);
+							break;
+						}
+						xQueueReceive(displayReadyMssgBox, &dummy, 0); // empty mssgbox
+						if ( xQueueSend( displayMssgBox, &displayMssg, 0 ) == pdPASS)
+							xQueueReceive(displayReadyMssgBox, &dummy, 500 / portTICK_PERIOD_MS); // if accepted wait until data is displayed
 					}
-					xQueueReceive(displayReadyMssgBox, &dummy, 0); // empty mssgbox
-					if ( xQueueSend( displayMssgBox, &displayMssg, 0 ) == pdPASS)
-						xQueueReceive(displayReadyMssgBox, &dummy, 500/portTICK_PERIOD_MS); // if accepted wait until data is displayed
-				}
 
-				Serial.print("co2(ppm):");
-				Serial.print(lastVal.co2, 1);
-				Serial.print(" temp(C):");
-				Serial.print(lastVal.temperature, 1);
-				Serial.print(" humidity(%):");
-				Serial.print(lastVal.hum, 1);
-				Serial.println();
-
-				sprintf( str, "1:%d",lastVal.co2);
-				UDPsendMssg(UDPTXPORT, str , strlen(str));
-
-				time(&now);
-				localtime_r(&now, &timeinfo);
-				if (lastminute != timeinfo.tm_min ) {
-					 lastminute = timeinfo.tm_min;   // every minute
-					 tLog[logTxIdx] = lastVal;
-					 logTxIdx++;
-					 if (logTxIdx >= MAXLOGVALUES)
-						logTxIdx = 0;
+					sprintf(str, "1:%2.0f", lastVal.co2);
+					UDPsendMssg(UDPTXPORT, str, strlen(str));
+					time(&now);
+					localtime_r(&now, &timeinfo);
+					if (lastminute != timeinfo.tm_min) {
+						lastminute = timeinfo.tm_min;   // every minute
+						tLog[logTxIdx] = lastVal;
+						logTxIdx++;
+						if (logTxIdx >= MAXLOGVALUES)
+							logTxIdx = 0;
+					}
 				}
 			}
 			xSemaphoreGive(I2CSemaphore);
@@ -226,44 +262,97 @@ void sensirionTask(void *pvParameter) {
 	}
 }
 
-// called from CGI
+// CGI stuff
+
+calValues_t calValues = { NOCAL, NOCAL, NOCAL };
+
+const CGIdesc_t writeVarDescriptors[NR_CALDESCRIPTORS] = { { "Temperatuur", &calValues.temperature, FLT, 1 }, { "RH", &calValues.RH, FLT, 1 }, { "CO2", &calValues.CO2, FLT, 1 }, };
 
 int getRTMeasValuesScript(char *pBuffer, int count) {
-int len = 0;
+	int len = 0;
 
-switch (scriptState) {
-case 0:
-	scriptState++;
-	len += sprintf(pBuffer + len, "%d,", lastVal.timeStamp);
-	len += sprintf(pBuffer + len, "%3.2f,", lastVal.temperature);
-	len += sprintf(pBuffer + len, "%3.2f,", lastVal.hum);
-	len += sprintf(pBuffer + len, "%d,", lastVal.co2);
-	len += sprintf(pBuffer + len, "%3.1f\n",lastVal.PIDsetting);
-	return len;
-	break;
-default:
-	break;
-}
-return 0;
+	switch (scriptState) {
+	case 0:
+		scriptState++;
+		len += sprintf(pBuffer + len, "%ld,", lastVal.timeStamp);
+		len += sprintf(pBuffer + len, "%3.2f,", lastVal.temperature);
+		len += sprintf(pBuffer + len, "%3.2f,", lastVal.hum);
+		len += sprintf(pBuffer + len, "%3.0f,", lastVal.co2);
+		len += sprintf(pBuffer + len, "%3.1f\n", lastVal.PIDsetting);
+		return len;
+		break;
+	default:
+		break;
+	}
+	return 0;
 }
 
+int getInfoValuesScript(char *pBuffer, int count) {
+	int len = 0;
+	switch (scriptState) {
+	case 0:
+		scriptState++;
+
+		len += sprintf(pBuffer + len, "%s\n", "Meting,Actueel,Offset");
+		len += sprintf(pBuffer + len, "%s,%3.2f,%3.2f\n", "Temperatuur", lastVal.temperature, userSettings.temperatureOffset);
+		len += sprintf(pBuffer + len, "%s,%3.1f,%3.1f\n", "RH", lastVal.hum, userSettings.RHoffset);
+		len += sprintf(pBuffer + len, "%s,%3.0f,%3.0f\n", "CO2", lastVal.co2, userSettings.CO2offset);
+
+//		len += sprintf(pBuffer + len, "%ld,", lastVal.timeStamp);
+//		len += sprintf(pBuffer + len, "%3.2f,", lastVal.temperature);
+//		len += sprintf(pBuffer + len, "%3.1f,", lastVal.hum);
+//		len += sprintf(pBuffer + len, "%3.1f\n", lastVal.PIDsetting);
+		return len;
+		break;
+	default:
+		break;
+	}
+	return 0;
+}
+
+// only build javascript table
+
+int getCalValuesScript(char *pBuffer, int count) {
+	int len = 0;
+	switch (scriptState) {
+	case 0:
+		scriptState++;
+		len += sprintf(pBuffer + len, "%s\n", "Meting,Referentie,Stel in,Herstel");
+		len += sprintf(pBuffer + len, "%s\n", "Temperatuur\n RH\n CO2");
+		return len;
+		break;
+	default:
+		break;
+	}
+	return 0;
+}
+
+int saveSettingsScript(char *pBuffer, int count) {
+	saveSettings();
+	return 0;
+}
+
+int cancelSettingsScript(char *pBuffer, int count) {
+	loadSettings();
+	return 0;
+}
 
 // these functions only work for one user!
 
 int getNewMeasValuesScript(char *pBuffer, int count) {
 
-int left, len = 0;
-if (logRxIdx != (logTxIdx)) {  // something to send?
-	do {
-		len += sprintf(pBuffer + len, "%d,", tLog[logRxIdx].timeStamp);
-		len += sprintf(pBuffer + len, "%3.2f,", tLog[logRxIdx].temperature);
-		len += sprintf(pBuffer + len, "%3.2f,", tLog[logRxIdx].hum);
-		len += sprintf(pBuffer + len, "%d,", tLog[logRxIdx].co2);
-		len += sprintf(pBuffer + len, "%3.3f\n", tLog[logRxIdx].PIDsetting);
-		logRxIdx++;
-		if (logRxIdx > MAXLOGVALUES)
-			logRxIdx = 0;
-		left = count - len;
+	int left, len = 0;
+	if (logRxIdx != (logTxIdx)) {  // something to send?
+		do {
+			len += sprintf(pBuffer + len, "%ld,", tLog[logRxIdx].timeStamp);
+			len += sprintf(pBuffer + len, "%3.2f,", tLog[logRxIdx].temperature);
+			len += sprintf(pBuffer + len, "%3.1f,", tLog[logRxIdx].hum);
+			len += sprintf(pBuffer + len, "%3.0f,", tLog[logRxIdx].co2);
+			len += sprintf(pBuffer + len, "%3.3f\n", tLog[logRxIdx].PIDsetting);
+			logRxIdx++;
+			if (logRxIdx > MAXLOGVALUES)
+				logRxIdx = 0;
+			left = count - len;
 
 		} while ((logRxIdx != logTxIdx) && (left > 40));
 
@@ -299,10 +388,10 @@ int getLogScript(char *pBuffer, int count) {
 	if (scriptState == 1) { // send complete buffer
 		if (logsToSend) {
 			do {
-				len += sprintf(pBuffer + len, "%d,", tLog[logRxIdx].timeStamp);
+				len += sprintf(pBuffer + len, "%ld,", tLog[logRxIdx].timeStamp);
 				len += sprintf(pBuffer + len, "%3.2f,", tLog[logRxIdx].temperature);
-				len += sprintf(pBuffer + len, "%3.2f,", tLog[logRxIdx].hum);
-				len += sprintf(pBuffer + len, "%d,", tLog[logRxIdx].co2);
+				len += sprintf(pBuffer + len, "%3.1f,", tLog[logRxIdx].hum);
+				len += sprintf(pBuffer + len, "%3.0f,", tLog[logRxIdx].co2);
 				len += sprintf(pBuffer + len, "%3.3f\n", tLog[logRxIdx].PIDsetting);
 				logRxIdx++;
 				if (logRxIdx >= MAXLOGVALUES)
@@ -316,3 +405,21 @@ int getLogScript(char *pBuffer, int count) {
 	return len;
 }
 
+void parseCGIWriteData(char *buf, int received) {
+	if (strncmp(buf, "setCal:", 7) == 0) {
+		if (readActionScript( &buf[7], writeVarDescriptors, NR_CALDESCRIPTORS)) {
+			if (calValues.temperature != NOCAL) { // then real temperature received
+				userSettings.temperatureOffset = rawlastVal.temperature - calValues.temperature ;
+				calValues.temperature = NOCAL;
+			}
+			if (calValues.CO2 != NOCAL) { // then real temperature received
+				userSettings.CO2offset =rawlastVal.co2 -calValues.CO2 ;
+				calValues.CO2 = NOCAL;
+			}
+			if (calValues.RH != NOCAL) { // then real temperature received
+				userSettings.RHoffset = rawlastVal.hum - calValues.RH;
+				calValues.RH = NOCAL;
+			}
+		}
+	}
+}

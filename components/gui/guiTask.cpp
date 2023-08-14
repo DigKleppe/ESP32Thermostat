@@ -24,6 +24,7 @@
 #include "freertos/semphr.h"
 #include "styles.h"
 
+#include "wifiConnect.h"
 #include "settings.h"
 
 //extern MenuSetttingsDesrc_t DMMSettingsDescrTable[];
@@ -48,31 +49,22 @@ extern uint32_t upTime;
 
 #define NRSCREENS 5
 
-
 const SpinBoxDescr_t settingsScreenDescr1[] = {
-	{
-	.name = "temperatuur offset:" ,
-	.format = "%2.1f",
-	.maxVal = +5.0,
-	.minVal = -5.0,
-	.step = 0.1,
-	.var = &userSettings.temperatureOffset,
-	},
-	{.name = "P-factor:" ,
+	{	.name = "P-factor:" ,
 		.format = "%1.2f",
 		.maxVal = 100,
 		.minVal = 0,
 		.step = 1,
 		.var = &userSettings.PIDp,
 	},
-	{.name = "I-factor:" ,
+	{	.name = "I-factor:" ,
 		.format = "%2.1f",
 		.maxVal = 100,
 		.minVal = 0,
 		.step = 0.1,
 		.var = &userSettings.PIDi,
 	},
-	{.name = "Max I:" ,
+	{	.name = "Max I:" ,
 		.format = "%2.1f",
 		.maxVal = 100,
 		.minVal = 0,
@@ -91,33 +83,50 @@ const SpinBoxDescr_t settingsScreenDescr1[] = {
 
 const SpinBoxDescr_t settingsScreenDescr2[] = {
 	{
-	.name = "Control interval:" ,
-	.format = "%2.0f",
-	.maxVal = 100,
-	.minVal = 1,
-	.step = 1,
-	.var = &userSettings.controlInterval,
+		.name = "temperatuur offset:" ,
+		.format = "%2.1f",
+		.maxVal = +5.0,
+		.minVal = -5.0,
+		.step = 0.1,
+		.var = &userSettings.temperatureOffset,
 	},
 	{
-	.name = "Schermverlichting:" ,
-	.format = "%2.0f",
-	.maxVal = 80,
-	.minVal = 5,
-	.step = 5,
-	.var = &userSettings.backLigth,
+		.name = "CO2 offset:" ,
+		.format = "%2.0f",
+		.maxVal = +500.0,
+		.minVal = -5000,
+		.step = 1,
+		.var = &userSettings.CO2offset,
 	},
 	{
-	.name = NULL,
-	.format = NULL,
-	.maxVal = 100,
-	.minVal = 0,
-	.step = 0.1,
-	.var = NULL,
+		.name = "Control interval:" ,
+		.format = "%2.0f",
+		.maxVal = 100,
+		.minVal = 1,
+		.step = 1,
+		.var = &userSettings.controlInterval,
+	},
+	{
+		.name = "Schermverlichting:" ,
+		.format = "%2.0f",
+		.maxVal = 80,
+		.minVal = 5,
+		.step = 5,
+		.var = &userSettings.backLight,
+	},
+	{
+		.name = NULL,
+		.format = NULL,
+		.maxVal = 100,
+		.minVal = 0,
+		.step = 0.1,
+		.var = NULL,
 	}
 };
 
+
 const infoDescr_t infoDesc[] = {
-	{"Netwerk:" ,"%s", userSettings.SSID },
+	{"Netwerk:" ,"%s", wifiSettings.SSID },
 	{"IPadres:","%s",myIP },
 	{"PID:","%2.2f", &PIDsetting },
 	{"Optijd:","%d", &upTime },
@@ -177,7 +186,7 @@ void guiTask(void *pvParameter) {
 	initStyles();
 
 	while (!displayReady)
-		vTaskDelay(100 / portTICK_RATE_MS);
+		vTaskDelay(100 / portTICK_PERIOD_MS);
 
 	settingsScreen1 = new SettingsScreen(settingsScreenDescr1);
 	settingsScreen2 = new SettingsScreen(settingsScreenDescr2);

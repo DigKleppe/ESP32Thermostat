@@ -4,7 +4,6 @@
 var CO2Data;
 var tempAndRHdata;
 
-
 var chartRdy = false;
 var tick = 0;
 var dontDraw = false;
@@ -20,8 +19,6 @@ var lastTimeStamp = 0;
 var MINUTESPERTICK = 1;// log interval 
 var LOGDAYS = 7;
 var MAXPOINTS = LOGDAYS * 24 * 60 / MINUTESPERTICK;
-
-var SIMULATE = false;
 
 var displayNames = ["", "temperatuur", "vochtigheid", "CO2", "PID"];
 var dayNames = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
@@ -120,12 +117,12 @@ function initChart() {
 	tempAndRHdata.addColumn('number', 't');
 	tempAndRHdata.addColumn('number', 'RH');
 	tempAndRHdata.addColumn('number', 'PID');
-	
 
 	chartRdy = true;
 	dontDraw = false;
-	if (SIMULATE)
+	if (SIMULATE) {
 		simplot();
+	}
 	else {
 		startTimer();
 	}
@@ -180,6 +177,11 @@ function simplot() {
 		str2 = str2 + simMssgCnts++ + "," + simValue2 + "," + (100 * (simValue2 + 3)) + "," + (simValue2 + 20) + "," + (simValue2 * 5) + ","  + "\n";
 	}
 	plotArray(str2);
+	for (var m = 1; m <= 4; m++) { // time not used for now 
+		var value = simValue2; // from string to float
+		document.getElementById(displayNames[m]).innerHTML = value.toFixed(2);
+	}
+	
 }
 
 function plotArray(str) {
@@ -240,22 +242,19 @@ function plotArray(str) {
 		updateAllDayTimeLabels(CO2Data);
 		updateAllDayTimeLabels(tempAndRHdata);
 	}
-
 	tRHchart.draw(tempAndRHdata, tempAndRHoptions);
 	CO2chart.draw(CO2Data, CO2Options);
 }
 
-
 function timer() {
 	var arr;
 	var str;
-
+	presc--
+	
 	if (SIMULATE) {
 		simplot();
-
 	}
 	else {
-		presc--;
 		if (presc == 0) {
 			presc = 10; // 10 seconds  interval
 

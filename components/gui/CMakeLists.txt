@@ -11,8 +11,10 @@ MACRO(HEADER_DIRECTORIES return_list)
     SET(${return_list} ${dir_list})
 ENDMACRO()
 HEADER_DIRECTORIES(header_dir_list)
+#set(COMPONENT_PRIV_REQUIRES  "esp_timer")
+
 idf_component_register(SRCS ${SOURCES}
                        INCLUDE_DIRS .
-               	       REQUIRES lvgl )
+               	       REQUIRES lvgl esp_timer)
                	      
                                   

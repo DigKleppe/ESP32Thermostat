@@ -13,10 +13,13 @@
 #include <string.h>
 
 #include "lwip/mem.h"
-#include "cgiScripts.h"
 
+#include "cgiScripts.h"
+#include "../../main/include/sensirionTask.h"
 #include "../../main/include/settings.h"
 #include "../http/include/httpd.h"
+
+
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -29,7 +32,7 @@ const tCGI *g_pCGIs;
 int g_iNumCGIs;
 
 
-#define NUM_CGIurls 5
+#define NUM_CGIurls 10
 
 // http:/192.168.2.7///cgi-bin/getLogMeasValues
 
@@ -37,16 +40,13 @@ const char* startCGIscript(int iIndex, char *pcParam);
 const char* readCGIvalues(int iIndex, char *pcParam);
 
 int readVarScript(char *pBuffer, int count);
-int getLogScript(char *pBuffer, int count);
-int getRTMeasValuesScript(char *pBuffer, int count);
+//int getLogScript(char *pBuffer, int count);
+//int getRTMeasValuesScript(char *pBuffer, int count);
 //int getAvgMeasValuesScript(char *pBuffer, int count);
 
 
-
-
-
 int actionRespScript(char *pBuffer, int count);
-bool readActionScript(char *pcParam);
+bool readActionScript(char *pcParam, const CGIdesc_t *CGIdescTable, int size );
 
 int scriptState;
 CGIresponseFileHandler_t readResponseFile;
@@ -54,34 +54,33 @@ int todoIndex;
 
 const static char http_html_hdr[] = "HTTP/1.1 200 OK\nContent-type: text/html\n\n,";
 
-typedef struct {
-	const char *name;
-	void *pValue;
-	varType_t type;
-	int nrValues;
-} CGIdesc_t;
+
 
 int readDescriptors(char *pBuffer, int count);
 
 // do not alter
 static const tCGI CGIurls[NUM_CGIurls] = {
-		{ "/cgi-bin/Readvar", (tCGIHandler_t) readCGIvalues, (CGIresponseFileHandler_t) readVarScript },  // !!!!!! index  !!
+		{ "/cgi-bin/readvar", (tCGIHandler_t) readCGIvalues, (CGIresponseFileHandler_t) readVarScript },  // !!!!!! index  !!
+		{ "/cgi-bin/writevar", (tCGIHandler_t) readCGIvalues, (CGIresponseFileHandler_t) readVarScript },  // !!!!!! index  !!
 		{ "/action_page.php", (tCGIHandler_t) readCGIvalues,(CGIresponseFileHandler_t) actionRespScript },
 		{ "/cgi-bin/getLogMeasValues", (tCGIHandler_t) readCGIvalues, (CGIresponseFileHandler_t) getLogScript},
 		{ "/cgi-bin/getRTMeasValues", (tCGIHandler_t) readCGIvalues, (CGIresponseFileHandler_t) getRTMeasValuesScript},
-	//	{ "/cgi-bin/getAvgMeasValues", (tCGIHandler_t) readCGIvalues, (CGIresponseFileHandler_t) getAvgMeasValuesScript},
-
-};
+		{ "/cgi-bin/getInfoValues", (tCGIHandler_t) readCGIvalues, (CGIresponseFileHandler_t) getInfoValuesScript},
+		{ "/cgi-bin/getCalValues", (tCGIHandler_t) readCGIvalues, (CGIresponseFileHandler_t) getCalValuesScript},
+		{ "/cgi-bin/saveSettings", (tCGIHandler_t) readCGIvalues, (CGIresponseFileHandler_t) saveSettingsScript},
+		{ "/cgi-bin/cancelSettings", (tCGIHandler_t) readCGIvalues, (CGIresponseFileHandler_t) cancelSettingsScript},
+	};
 
 static const CGIdesc_t CGIdescriptors[] = {
 	//	{ "measValues", (void*) &measValues, STR, sizeof(measValues) / sizeof(char*) },
 };
 
 
-static const CGIdesc_t actionDescriptors[] = {
-
-		//{ "calValue",&calValue, CALVAL, 1 }
-};
+//static const CGIdesc_t calibrateDescriptors[] = {
+//	{ "Temperature",&calValue, FLT, 1 },
+//	{ "RH",&calValue, FLT, 1 },
+//	{ "Temperature",&calValue, FLT, 1 },
+//};
 
 const char* startCGIscript(int iIndex, char *pcParam) {
 	int n;
@@ -98,9 +97,11 @@ const char* startCGIscript(int iIndex, char *pcParam) {
 		if (n >= sizeof(CGIdescriptors) / sizeof(CGIdesc_t))
 			return "";
 		break;
-	case 2:  // action script
-		readActionScript(pcParam);
-		return ("/spiffs/dmm.html");
+	case 2:  // writevar
+		break;
+	case 8:  // setCal
+//		readActionScript(pcParam , &calibrateDescriptors[0], sizeof(calibrateDescriptors) / sizeof(CGIdesc_t));
+	//	return ("/spiffs/dmm.html");
 		break;
 
 	default:
@@ -109,7 +110,7 @@ const char* startCGIscript(int iIndex, char *pcParam) {
 	return ("/CGIreturn.txt");
 }
 
-bool readActionScript(char *pcParam) {
+bool readActionScript(char *pcParam, const CGIdesc_t *CGIdescTable, int size ) {
 	int n, m, len;
 	bool success = false;
 
@@ -127,18 +128,18 @@ bool readActionScript(char *pcParam) {
 			if (p[n] == '=') {
 				strncpy(name, p, n);
 				name[n] = 0;
-				for (m = 0; m < sizeof(actionDescriptors) / sizeof(CGIdesc_t); m++) {
-					if (strcmp(name, actionDescriptors[m].name) == 0) { // found
+				for (m = 0; m < size; m++) {
+					if (strcmp(name, CGIdescTable->name) == 0) { // found
 						if (p[n + 1] != '&') { // empty value
-							switch (actionDescriptors[m].type) {
+							switch (CGIdescTable->type) {
 							case FLT:
-								sscanf(&p[n + 1], "%f", (float*) actionDescriptors[m].pValue); // read value
+								sscanf(&p[n + 1], "%f", (float*) CGIdescTable->pValue); // read value
 								break;
 							case INT:
-								sscanf(&p[n + 1], "%d", (int*) actionDescriptors[m].pValue); // read value
+								sscanf(&p[n + 1], "%d", (int*) CGIdescTable->pValue); // read value
 								break;
 							case STR:
-								pDest = (char*) actionDescriptors[m].pValue;
+								pDest = (char*) CGIdescTable->pValue;
 								pSrc = &p[n + 1];
 								for (int m = 0; m < MAX_STRLEN - 1; m++) {
 									if (*pSrc == '+') // spaces are replaced by '+' in HTML form
@@ -146,7 +147,6 @@ bool readActionScript(char *pcParam) {
 									*pDest++ = *pSrc++;
 									if ((*pSrc == '&') || (*pSrc == 0)) // read until '&' or EOS
 										break;
-
 								}
 								*pDest = 0;
 								break;
@@ -163,11 +163,15 @@ bool readActionScript(char *pcParam) {
 						success = true;
 						break;
 					}
+					CGIdescTable++;
 				}
 				break;
 			}
 		}
 		p += n + 1;
+		if (success)
+			settingsChanged = true;
+
 		success = false;  // try to find next value
 		for (n = 0; n < strlen(p); n++) {
 			if (p[n] == '&') {
@@ -176,11 +180,20 @@ bool readActionScript(char *pcParam) {
 				break;
 			}
 		}
+
 	} while (success);
 
-	settingsChanged = true;
-	return false;
+
+	return settingsChanged;
 }
+//void parseCGIWriteData(char * buf, int received) {
+//
+//}
+
+
+
+
+
 
 /**
  * parses CGI values
@@ -318,7 +331,7 @@ int readVarScript(char *pBuffer, int count) {
 
 
 void CGI_init(void) {
-	g_pCGIs = CGIurls;
+	g_pCGIs = CGIurls; // for file_server to read CGIurls
 	g_iNumCGIs = NUM_CGIurls;
 
 }

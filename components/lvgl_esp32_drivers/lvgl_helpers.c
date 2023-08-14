@@ -173,7 +173,10 @@ bool lvgl_i2c_driver_init(int port, int sda_pin, int scl_pin, int speed_hz)
 {
     esp_err_t err;
     
-    ESP_LOGI(TAG, "Initializing I2C master port %d...", port);
+//    ESP_LOGI(TAG, "Initializing I2C master port %d...", port);
+//    ESP_LOGI(TAG, "Already done");
+//    return ESP_OK;
+
     ESP_LOGI(TAG, "SDA pin: %d, SCL pin: %d, Speed: %d (Hz)",
         sda_pin, scl_pin, speed_hz);
     
@@ -227,11 +230,15 @@ bool lvgl_spi_driver_init(int host,
 
     spi_bus_config_t buscfg = {
         .miso_io_num = miso_pin,
-	.mosi_io_num = mosi_pin,
-	.sclk_io_num = sclk_pin,
-	.quadwp_io_num = quadwp_pin,
-	.quadhd_io_num = quadhd_pin,
-        .max_transfer_sz = max_transfer_sz
+		.mosi_io_num = mosi_pin,
+		.sclk_io_num = sclk_pin,
+		.quadwp_io_num = quadwp_pin,
+		.quadhd_io_num = quadhd_pin,
+		.data4_io_num = -1,
+		.data5_io_num = -1,
+		.data6_io_num = -1,
+		.data7_io_num = -1,
+		.max_transfer_sz = max_transfer_sz
     };
 
     ESP_LOGI(TAG, "Initializing SPI bus...");

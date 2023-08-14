@@ -120,9 +120,11 @@ void lv_mem_deinit(void)
  * @param size size of the memory to allocate in bytes
  * @return pointer to the allocated memory
  */
+
+#include <stdio.h>
 void * lv_mem_alloc(size_t size)
 {
-    MEM_TRACE("allocating %lu bytes", (unsigned long)size);
+	MEM_TRACE("allocating %lu bytes", (unsigned long)size);
     if(size == 0) {
         MEM_TRACE("using zero_mem");
         return &zero_mem;

@@ -30,6 +30,7 @@
 #include "../../lvgl_esp32_drivers/lvgl_i2c_conf.h"
 
 #define TAG "FT6X36"
+static bool noDevicePresent;
 
 
 ft6x36_status_t ft6x36_status;
@@ -47,7 +48,7 @@ esp_err_t ft6x06_i2c_read8(uint8_t slave_addr, uint8_t register_addr, uint8_t *d
 
     i2c_master_read_byte(i2c_cmd, data_buf, I2C_MASTER_NACK);
     i2c_master_stop(i2c_cmd);
-    esp_err_t ret = i2c_master_cmd_begin(TOUCH_I2C_PORT, i2c_cmd, 1000 / portTICK_RATE_MS);
+    esp_err_t ret = i2c_master_cmd_begin(TOUCH_I2C_PORT, i2c_cmd, 1000 / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(i2c_cmd);
     return ret;
 }
@@ -87,15 +88,17 @@ void ft6x06_init(uint16_t dev_addr) {
         if (code != ESP_OK) {
             ft6x36_status.inited = false;
             ESP_LOGE(TAG, "Error during I2C init %s", esp_err_to_name(code));
+            noDevicePresent = true;
         } else {
             ft6x36_status.inited = true;
             current_dev_addr = dev_addr;
             uint8_t data_buf;
             esp_err_t ret;
-            ESP_LOGI(TAG, "Found touch panel controller");
-            if ((ret = ft6x06_i2c_read8(dev_addr, FT6X36_PANEL_ID_REG, &data_buf) != ESP_OK))
-                ESP_LOGE(TAG, "Error reading from device: %s",
-                         esp_err_to_name(ret));    // Only show error the first time
+
+            if ((ret = ft6x06_i2c_read8(dev_addr, FT6X36_PANEL_ID_REG, &data_buf) != ESP_OK)) {
+                ESP_LOGE(TAG, "Error reading from device: %s", esp_err_to_name(ret));    // Only show error the first time
+                noDevicePresent = true;
+            }
             ESP_LOGI(TAG, "\tDevice ID: 0x%02x", data_buf);
 
             ft6x06_i2c_read8(dev_addr, FT6X36_CHIPSELECT_REG, &data_buf);
@@ -126,6 +129,9 @@ bool ft6x36_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     static int16_t last_y = 0;  // 12bit pixel value
 //	esp_log_level_set(TAG, ESP_LOG_VERBOSE);
 
+    if ( noDevicePresent)
+    	return false;
+
     ft6x06_i2c_read8(current_dev_addr, FT6X36_TD_STAT_REG, &touch_pnt_cnt);
     if (touch_pnt_cnt != 1) {    // ignore no touch & multi touch
         data->point.x = last_x;
@@ -147,7 +153,7 @@ bool ft6x36_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     i2c_master_read_byte(i2c_cmd, &data_xy[0], I2C_MASTER_ACK);     // reads FT6X36_P1_XH_REG
     i2c_master_read_byte(i2c_cmd, &data_xy[1], I2C_MASTER_NACK);    // reads FT6X36_P1_XL_REG
     i2c_master_stop(i2c_cmd);
-    esp_err_t ret = i2c_master_cmd_begin(TOUCH_I2C_PORT, i2c_cmd, 1000 / portTICK_RATE_MS);
+    esp_err_t ret = i2c_master_cmd_begin(TOUCH_I2C_PORT, i2c_cmd, 1000 / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(i2c_cmd);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Error getting X coordinates: %s", esp_err_to_name(ret));
@@ -170,7 +176,7 @@ bool ft6x36_read(lv_indev_drv_t *drv, lv_indev_data_t *data) {
     i2c_master_read_byte(i2c_cmd, &data_xy[2], I2C_MASTER_ACK);     // reads FT6X36_P1_YH_REG
     i2c_master_read_byte(i2c_cmd, &data_xy[3], I2C_MASTER_NACK);    // reads FT6X36_P1_YL_REG
     i2c_master_stop(i2c_cmd);
-    ret = i2c_master_cmd_begin(TOUCH_I2C_PORT, i2c_cmd, 1000 / portTICK_RATE_MS);
+    ret = i2c_master_cmd_begin(TOUCH_I2C_PORT, i2c_cmd, 1000 / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(i2c_cmd);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Error getting Y coordinates: %s", esp_err_to_name(ret));

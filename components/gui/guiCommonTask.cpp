@@ -19,6 +19,7 @@
 #include "lvgl/lvgl.h"
 #endif
 
+#include "esp_timer.h"
 
 // fonts 0x5E 0xB0 0123456789 :-.,C%
 //https://lvgl.io/tools/fontconverter

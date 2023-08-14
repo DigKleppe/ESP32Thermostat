@@ -317,8 +317,6 @@ menu "Example Connection Configuration"
         endchoice
 
     endif
-
-
 endmenu
 
 menu "Example mdns Configuration"

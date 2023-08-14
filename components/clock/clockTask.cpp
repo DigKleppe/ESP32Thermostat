@@ -43,6 +43,7 @@ void clockTask(void *pvParameter) {
 	int lastsec = -1;
 	char strftime_buf[64];
 	ClockDisplay * pd;
+	bool once = false;
 
     setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3",1);
     tzset();
@@ -62,8 +63,11 @@ void clockTask(void *pvParameter) {
     	 localtime_r(&now, &timeinfo);
     	 if (lastsec != timeinfo.tm_sec ) {
     		 lastsec = timeinfo.tm_sec;
-    	//	 strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-    	//	 ESP_LOGI(TAG, "The current date/time is: %s", strftime_buf);
+    		 if( !once) {
+    			 strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+    			 ESP_LOGI(TAG, "The current date/time is: %s", strftime_buf);
+    			 once = true;
+    		 }
     		 sprintf(strftime_buf,"%2d:%02d:%02d" , timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
     		 for ( int n=0 ; n < clockDisplays;n++){
     			 pd =  clockToUpdate[n];

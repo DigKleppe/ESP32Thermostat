@@ -13,23 +13,26 @@
 #include <time.h>
 #include <sys/time.h>
 
-typedef enum { FLT, STR, INT , DESCR , CALVAL} varType_t;
+#include "cgiScripts.h"
+
+
 #define MAX_STRLEN 32
-#define CHECKSTR 	 "test1"
-#define CALCHECKSTR  "test2"
+#define USERSETTINGS_CHECKSTR 	"test2"
+#define CALCHECKSTR  			"test2"
 
 typedef struct {
-	char SSID[MAX_STRLEN+1];
-	char pwd[MAX_STRLEN+1];
+	char spiffsVersion[16]; // holding current version
 	float temperatureSetpoint;
 	float temperatureOffset;
+	float CO2offset;
+	float RHoffset;
 	float PIDp;
 	float PIDi;
 	float PIDmaxi;
 	float controlInterval;
 	bool heatingOn;
 	bool coolingOn;
-	float backLigth;
+	float backLight;
 	char checkstr[MAX_STRLEN+1];
 }userSettings_t;
 
@@ -45,10 +48,14 @@ typedef struct {
 extern settingsDescr_t settingsDescr[];
 extern bool settingsChanged;
 
-esp_err_t saveUserSettings( void);
-esp_err_t loadUserSettings( void);
 
-extern userSettings_t 	userSettings;
+esp_err_t saveSettings( void);
+esp_err_t loadSettings( void);
+
+extern userSettings_t userSettings;
+
+
+
 
 
 #endif /* SETTINGS_H_ */
