@@ -26,8 +26,11 @@ The firmware knows its current version, and reads the firmware file on the serve
 If it is not the same the new binary is flashed by the bootloader.
 
 
-updating SPIFFS image:
-In the build folder a textfile CONFIG_SPIFFS_INFO_FILENAME containing only the version of the spiffs must be present.
+Updating SPIFFS image:
+
+Copy the generated image to the build folder and change the name to CONFIG_SPIFFS_UPGRADE_FILENAME
+
+In the build folder a textfile CONFIG_SPIFFS_INFO_FILENAME containing only the version of the spiffs must be present. EG "1.2" 
 
 if this version differs from the last flashed version the CONFIG_SPIFFS_UPGRADE_FILENAME is downloaded from the fileserver.
 
