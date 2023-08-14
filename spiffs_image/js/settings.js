@@ -79,7 +79,8 @@ function makeCalTable(descriptorData) {
 
 			var button = document.createElement("button");
 			button.innerHTML = "Stel in";
-			button.className = "button buttonGreen";
+		//	button.className = "button buttonGreen";
+			button.className = "button-3";
 			cell.appendChild(button);
 			row.appendChild(cell);
 
@@ -88,7 +89,8 @@ function makeCalTable(descriptorData) {
 
 			var button = document.createElement("button");
 			button.innerHTML = "Herstel";
-			button.className = "button buttonGreen";
+		//	button.className = "button buttonGreen";
+			button.className = "button-3";
 			button.setAttribute("id", "set" + i);
 
 			cell.appendChild(button);
