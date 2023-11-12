@@ -62,6 +62,7 @@ esp_err_t SCD30::begin(i2c_port_t masterPort, bool autoCalibrate, bool measBegin
 	gpio_set_direction(POWERSWITCHPIN, GPIO_MODE_OUTPUT);
 	gpio_set_level(POWERSWITCHPIN, 0); // active low
 	vTaskDelay(100); // wait for power
+
 	simulate = false;
 	uint16_t fwVer;
 

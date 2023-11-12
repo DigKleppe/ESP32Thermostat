@@ -19,12 +19,14 @@ thermostatStatus_t thermostatStatus;
 
 
 void heatingOff(){
+	printf( " *** OFF *** ");
 	gpio_set_level(HEATING_PIN, 1);
 	thermostatStatus = THERMOSTATOFF;
 
 }
 void heatingOn(){
 	if ( userSettings.heatingOn) {
+		printf( " *** ON *** ");
 		gpio_set_level(HEATING_PIN, 0);
 		thermostatStatus = HEATING_ON;
 	}

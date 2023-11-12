@@ -230,6 +230,8 @@ static esp_err_t download_get_handler(httpd_req_t *req) {
 	if (strcmp(filename, "/") == 0)  // klp default
 		strcpy(filename, "/index.html");
 
+	ESP_LOGE(TAG, "req file: %s", filename);
+
 	set_content_type_from_file(req, filename);
 	/* If name has trailing '/', respond with directory contents */
 	//    if (filename[strlen(filename) - 1] == '/') {
@@ -283,6 +285,9 @@ static esp_err_t download_get_handler(httpd_req_t *req) {
 			return ESP_FAIL;
 		}
 	}
+
+//	ESP_LOGI(TAG, "Sending file : %s (%ld bytes)...", filename, file_stat.st_size);
+
 	if (foundCGI) {
 		//	ESP_LOGI(TAG, "Sending CG responsefile : %s ...", filename);
 		//	printf( "Sending CG responsefile : %s ...", filename);
@@ -327,7 +332,7 @@ static esp_err_t download_get_handler(httpd_req_t *req) {
 			return ESP_FAIL;
 		}
 
-		ESP_LOGI(TAG, "Sending file : %s (%ld bytes)...", filename, file_stat.st_size);
+		//	ESP_LOGI(TAG, "Sending file : %s (%ld bytes)...", filename, file_stat.st_size);
 		set_content_type_from_file(req, filename);
 
 		/* Retrieve the pointer to scratch buffer for temporary storage */
@@ -355,9 +360,8 @@ static esp_err_t download_get_handler(httpd_req_t *req) {
 
 		/* Close file after sending complete */
 		fclose(fd);
-
 	}
-	ESP_LOGI(TAG, "File sending complete");
+	ESP_LOGI(TAG, "File sending complete %s (%ld bytes)", filename, file_stat.st_size);
 
 	/* Respond with an empty chunk to signal HTTP response completion */
 	httpd_resp_send_chunk(req, NULL, 0);
@@ -404,7 +408,7 @@ static esp_err_t upload_post_handler(httpd_req_t *req) {
 		return ESP_FAIL;
 	}
 
-	if (strncmp(filename, "/cgi-bin/",9) == 0)
+	if (strncmp(filename, "/cgi-bin/", 9) == 0)
 		isCGIWrite = true;  // klp use POST also for cgi-write commands
 	else {
 
@@ -455,7 +459,7 @@ static esp_err_t upload_post_handler(httpd_req_t *req) {
 
 		//printf( "%s", buf);
 		if (isCGIWrite) {
-			if ( received < SCRATCH_BUFSIZE )
+			if (received < SCRATCH_BUFSIZE)
 				buf[received] = 0;
 			parseCGIWriteData(buf, received);
 		} else {

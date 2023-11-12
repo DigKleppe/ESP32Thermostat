@@ -52,6 +52,8 @@ void guiTask(void *pvParameter);
 
 static const char *TAG = "main";
 
+//#define HEATING_PIN 	GPIO_NUM_15  //(JTAG?)
+
 SemaphoreHandle_t I2CSemaphore;  // used by lvgl touch and sensor, shares the same i2C bus
 
 esp_err_t init_spiffs(void);
@@ -119,6 +121,7 @@ static esp_err_t i2c_master_init(void) {
 	return i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
 }
 
+//socket creation failed: Too many open files in system
 extern "C" {
 void app_main() {
 	esp_err_t err;
@@ -152,6 +155,8 @@ void app_main() {
 	ESP_ERROR_CHECK(init_spiffs());
 
 	setBootPartitionToFactory();
+
+    gpio_reset_pin(HEATING_PIN);  // needed to disable JTAG
 
 	gpio_set_direction(COOLING_PIN, GPIO_MODE_OUTPUT);
 	gpio_set_direction(HEATING_PIN, GPIO_MODE_OUTPUT);
@@ -191,8 +196,8 @@ void app_main() {
 				wifiSettings.updated = false;
 				saveSettings();
 			}
-			if (checkWebsiteUpdateTmr == 0) {
-				checkWebsiteUpdateTmr = 10*60;
+			if (checkWebsiteUpdateTmr-- <= 0) {
+				checkWebsiteUpdateTmr =  10*60;
 				newStorageVersion[0] = 0;
 				spiffsUpdateFinised = true;
 				xTaskCreate(&updateSpiffsTask, "updateSpiffsTask", 8192, (void*) newStorageVersion, 5, &otaTaskh);

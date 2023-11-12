@@ -15,6 +15,7 @@ var table;
 var presc = 1;
 var simMssgCnts = 0;
 var lastTimeStamp = 0;
+var REQINTERVAL = 30 * 1000; // ms
 
 var MINUTESPERTICK = 1;// log interval 
 var LOGDAYS = 7;
@@ -131,7 +132,7 @@ function initChart() {
 
 function startTimer() {
 	if (!SIMULATE)
-		setInterval(function() { timer() }, 1000);
+		setInterval(function() { timer() }, 1000);  
 }
 
 var firstRequest = true;
@@ -289,7 +290,6 @@ function timer() {
 				arr = getLogMeasValues();
 				plotArray(arr);
 				firstRequest = false;
-				setInterval(function() { timer() }, 10000);
 			}
 		}
 	}

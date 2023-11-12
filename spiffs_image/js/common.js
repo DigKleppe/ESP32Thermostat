@@ -11,31 +11,6 @@ var RHINFOROW = 2;
 var CO2INFOROW = 3;
 
 
-function upload( fileInput) {
-
-	var upload_path = "/upload/descriptors.dmm";
-
-	var file = fileInput[0];
-	var xhttp = new XMLHttpRequest();
-	xhttp.onreadystatechange = function() {
-		if (xhttp.readyState == 4) {
-			if (xhttp.status == 200) {
-				document.open();
-				document.write(xhttp.responseText);
-				document.close();
-			} else if (xhttp.status == 0) {
-				alert("Server closed the connection abruptly!");
-				location.reload()
-			} else {
-				alert(xhttp.status + " Error!\n" + xhttp.responseText);
-				location.reload()
-			}
-		}
-	};
-	xhttp.open("POST", upload_path, true);
-	xhttp.send(fileInput);
-}
-
 function sendItem(item) {
 	console.log("sendItem: " + item);
 	if (SIMULATE)

@@ -18,12 +18,25 @@ in the SDK configuration
 # Firmware_Storage Upgrade Configuration
 #
 CONFIG_DEFAULT_FIRMWARE_UPGRADE_URL="http://192.168.2.1:8070/"
-CONFIG_FIRMWARE_UPGRADE_FILENAME="thermostaat.bin"
-CONFIG_SPIFFS_UPGRADE_FILENAME="storageThermostaat.bin"
-CONFIG_SPIFFS_INFO_FILENAME="storageVersionThermostaat.txt"
+CONFIG_FIRMWARE_UPGRADE_FILENAME="ESP32thermostat.bin"
+CONFIG_SPIFFS_UPGRADE_FILENAME="storageThermostat.bin"
+CONFIG_SPIFFS_INFO_FILENAME="storageVersionThermostat.txt"
 
 The firmware knows its current version, and reads the firmware file on the server.
 If it is not the same the new binary is flashed by the bootloader.
+
+The firmware version is set in CmakesList.txt in root folder.
+
+usage:
+flash and run userprogram. The userprogram writes Firmware_Storage Upgrade Configuration data to nvs.
+flash and run bootloader. The bootloader reads this data and tries to make connection with the fileserver.
+If the current version of the firmware is the same as the version present on the server the userprogram is started. 
+
+ 
+reset device, userprogram is written by bootloader.
+userprogram is executed.
+
+
 
 
 Updating SPIFFS image:

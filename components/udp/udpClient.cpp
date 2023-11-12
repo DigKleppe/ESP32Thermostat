@@ -50,7 +50,7 @@ int UDPsendMssg( int port, void * mssg, int len) {
     if (err < 0) {
         ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
     }
-    ESP_LOGI(TAG, "Message sent to port: %d", port);
+ //   ESP_LOGI(TAG, "Message sent to port: %d", port);
 
 
 	close(sockfd);

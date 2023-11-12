@@ -11,7 +11,7 @@
 #include "driver/gpio.h"
 
 #define COOLING_PIN 	GPIO_NUM_2
-#define HEATING_PIN 	GPIO_NUM_15
+#define HEATING_PIN 	GPIO_NUM_15  //(JTAG?)
 
 void updatePID ( float temperature);
 extern float PIDsetting; // for cgi

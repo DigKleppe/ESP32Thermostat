@@ -20,9 +20,13 @@
 #include "SCD30.h"
 #include "cgiScripts.h"
 
+#include <math.h>
+
 #define UDPTXPORT	5001
 #define MAXRETRIES 	5
 #define SCD30_TIMEOUT 600
+
+//#define SIMULATE
 
 static const char *TAG = "sensirionTask";
 
@@ -147,6 +151,56 @@ void sensirionTask(void *pvParameter) {
 //	}
 
 	time(&now);
+
+#ifdef SIMULATE
+	float x = 0;
+
+	ESP_LOGI(TAG, "Simulating Air sensor");
+	while (1) {
+		vTaskDelay(1000);
+		lastVal.timeStamp = timeStamp++;
+		rawlastVal.co2 = 500 + 100 * sin(x);
+		lastVal.co2 = rawlastVal.co2 - userSettings.CO2offset;
+		rawlastVal.hum = 200 + 100 * cos(x);
+		lastVal.hum = rawlastVal.hum - userSettings.RHoffset;
+		lastVal.temperature = 25 + 10 * sin(x + 1);
+		x += 0.01;
+		if (x > 1)
+			x = 0;
+		sprintf(str, "1:%2.0f", lastVal.co2);
+		UDPsendMssg(UDPTXPORT, str, strlen(str));
+		displayMssg.displayItem = DISPLAY_ITEM_MEASLINE;
+		for (int n = 0; n < 3; n++) {
+			displayMssg.line = n;
+			switch (n) {
+			case 0:
+				sprintf(str, "%2.1f", lastVal.temperature);
+				break;
+			case 1:
+				sprintf(str, "%2.1f", lastVal.hum);
+				break;
+			case 2:
+				sprintf(str, "%2.0f", lastVal.co2);
+				break;
+			}
+		}
+		xQueueReceive(displayReadyMssgBox, &dummy, 0); // empty mssgbox
+		if ( xQueueSend( displayMssgBox, &displayMssg, 0 ) == pdPASS)
+			xQueueReceive(displayReadyMssgBox, &dummy, 500 / portTICK_PERIOD_MS); // if accepted wait until data is displayed
+
+		time(&now);
+		localtime_r(&now, &timeinfo);
+		if (lastminute != timeinfo.tm_min) {
+			lastminute = timeinfo.tm_min;   // every minute
+			tLog[logTxIdx] = lastVal;
+			logTxIdx++;
+			if (logTxIdx >= MAXLOGVALUES)
+				logTxIdx = 0;
+		}
+	}
+}
+
+#else
 	xSemaphoreTake(I2CSemaphore, portMAX_DELAY);
 
 	while ((airSensor.begin(I2CmasterPort, false, false) != ESP_OK) && (sensirionTimeoutTimer-- > 0)) {
@@ -260,7 +314,9 @@ void sensirionTask(void *pvParameter) {
 			xSemaphoreGive(I2CSemaphore);
 		}
 	}
+
 }
+#endif
 
 // CGI stuff
 
@@ -407,13 +463,13 @@ int getLogScript(char *pBuffer, int count) {
 
 void parseCGIWriteData(char *buf, int received) {
 	if (strncmp(buf, "setCal:", 7) == 0) {
-		if (readActionScript( &buf[7], writeVarDescriptors, NR_CALDESCRIPTORS)) {
+		if (readActionScript(&buf[7], writeVarDescriptors, NR_CALDESCRIPTORS)) {
 			if (calValues.temperature != NOCAL) { // then real temperature received
-				userSettings.temperatureOffset = rawlastVal.temperature - calValues.temperature ;
+				userSettings.temperatureOffset = rawlastVal.temperature - calValues.temperature;
 				calValues.temperature = NOCAL;
 			}
 			if (calValues.CO2 != NOCAL) { // then real temperature received
-				userSettings.CO2offset =rawlastVal.co2 -calValues.CO2 ;
+				userSettings.CO2offset = rawlastVal.co2 - calValues.CO2;
 				calValues.CO2 = NOCAL;
 			}
 			if (calValues.RH != NOCAL) { // then real temperature received
