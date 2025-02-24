@@ -248,9 +248,9 @@ void guiTask(void *pvParameter) {
 				disp_wait_for_pending_transactions();
 				xSemaphoreGive(xGuiSemaphore);
 			}
-			xQueueSend(displayReadyMssgBox, &dummy, 0);
-
+		//	xQueueSend(displayReadyMssgBox, &dummy, 0);
 		}
+		xQueueSend(displayReadyMssgBox, &dummy, 0);
 	}
 }
 
